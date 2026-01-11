@@ -39,23 +39,18 @@
         <td style="text-align:center">Regulation</td>
         <td style="text-align:center">32</td>
         <td rowspan="2" style="text-align:center">20</td>
-        <td rowspan="2" style="text-align:center">0 - 100</td>
+        <td rowspan="2" style="text-align:center">0-100</td>
         <td rowspan="2" style="text-align:center">Random</td>
-        <td style="text-align:center">
+        <td rowspan="2" style="text-align:center">
             <details>
                 <summary>Click to view code</summary>
-                <code style="word-break: break-all">e0g0w211111001100000w31110000000w11111111111100k051o000000f11100k012r02i0a46533a11002s0111111111002s0111002s01a111111111102a11111111111hg1ka03-11111--</code>
+                <code style="word-break: break-all">e0g14211111001100001431110000001411111111111100k051o000000f11100k012r02i0a46533a11002s0111111111002s0111002s01a111111111102a11111111111hg1ka03-11111--</code>
             </details>
         </td>
     </tr>
     <tr>
         <td style="text-align:center">Overtime</td>
         <td style="text-align:center">8</td>
-        <td style="text-align:center">
-            <details>
-                <summary>Click to view code</summary>
-                <code style="word-break: break-all;">e0g08211111001100000831110000000811111111111100k051o000000f11100k012r02i0a46533a11002s0111111111002s0111002s01a111111111102a11111111111hg1ka03-11111--</code>
-            </details>
         </td>
     </tr>
 </table>
@@ -83,16 +78,20 @@
             <td style="text-align:center">OP/DP Split</td>
             <td style="text-align:center">No</td>
             <td rowspan="3" style="text-align:center">No</td>
-            <td rowspan="5" style="text-align:center">Yes</td>
+            <td rowspan="2" style="text-align:center">Yes</td>
         </tr>
         <tr>
             <td style="text-align:center">DIFF</td>
             <td rowspan="3" style="text-align:center">Yes</td>
         </tr>
-        <tr><td style="text-align:center">ODIFF</td></tr>
+        <tr>
+            <td style="text-align:center">ODIFF</td>
+            <td style="text-align:center">No</td>
+        </tr>
         <tr>
             <td style="text-align:center">TDIFF</td>
             <td style="text-align:center">Yes</td>
+            <td rowspan="2" style="text-align:center">Yes</td>
         </tr>
         <tr>
             <td style="text-align:center">Rouge</td>
@@ -116,8 +115,8 @@
             <td rowspan="4" style="text-align:center"><b>REG</b></td>
             <td style="text-align:center">Song Count</td>
             <td style="text-align:center">32</td>
-            <td style="text-align:center">24</td>
-            <td style="text-align:center">16</td>
+            <td style="text-align:center">12-24</td>
+            <td style="text-align:center">9-16</td>
         </tr>
         <tr>
             <td style="text-align:center">Song Mix</td>
@@ -135,29 +134,40 @@
             <td style="text-align:center">Yes</td>
         </tr>
         <tr>
-            <td rowspan="5" style="text-align:center"><b>OT</b></td>
+            <td rowspan="6" style="text-align:center"><b>OT</b></td>
             <td style="text-align:center">Song Count</td>
             <td style="text-align:center">8</td>
-            <td style="text-align:center">6</td>
-            <td style="text-align:center">4</td>
+            <td style="text-align:center">3-6</td>
+            <td style="text-align:center">1-4</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">Song Mix</td>
+            <td style="text-align:center">Random</td>
+            <td style="text-align:center">Watched Equal</td>
+            <td style="text-align:center">Random</td>
         </tr>
         <tr>
             <td style="text-align:center">Sudden Death</td>
             <td rowspan="2" style="text-align:center">No</td>
-            <td rowspan="3" style="text-align:center">No</td>
+            <td rowspan="2" style="text-align:center">No</td>
             <td rowspan="2" style="text-align:center">Yes</td>
         </tr>
         <tr><td style="text-align:center">Tie</td></tr>
         <tr>
+            <td style="text-align:center">Last Tiebreaker</td>
+            <td colspan="2" style="text-align:center">Home</td>
+            <td style="text-align:center">Away</td>
+        </tr>
+        <tr>
             <td style="text-align:center">Runner on 2nd, 1 Out</td>
             <td style="text-align:center">Yes</td>
-            <td style="text-align:center">No</td>
+            <td colspan="2" style="text-align:center">No</td>
         </tr>
     </tbody>
 </table>
 
 ## Lineup: Away And Home, Captains
-Teams line up in **Watched Elo** order (Away team on Slots 1-4, then Home team on Slots 5-8). **Captains**' (Slots 1 and 5) correct guesses count **double** for (O)DIFF calculations.
+Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on Slots 5-8). **Captains**' (Slots 1 and 5) correct guesses count **double** for (O)DIFF calculations.
  
 ## Score: Check the (T)DIFF
 <details>
@@ -169,7 +179,7 @@ Teams line up in **Watched Elo** order (Away team on Slots 1-4, then Home team o
     indicates the player number (P#) currently hitting.</p>
     <ol>
         <li><b>DIFF:</b> Hitting P# score - Pitching P# score.</li>
-        <li><b>ODIFF:</b> If DIFF > 0, calculate Hitting PN# score - Pitching PN# score for non-at-bat players.</li>
+        <li><b>ODIFF:</b> If DIFF ≥ 0, calculate Hitting PN# score - Pitching PN# score for non-at-bat players.</li>
         <li><b>TDIFF:</b> DIFF + max(0, ODIFF).</li>
     </ol>
     </p>
@@ -185,14 +195,14 @@ Teams line up in **Watched Elo** order (Away team on Slots 1-4, then Home team o
     </tr>
     <tr>
         <td style="text-align:center"><code>Strikeout</code></td>
-        <td style="text-align:center">≤0</td>
+        <td style="text-align:center">< 0</td>
         <td style="text-align:center">N/A</td>
         <td style="text-align:center">Add 1 Out</td>
         <td style="text-align:center">Swap on 3rd Out</td>
     </tr>
     <tr>
         <td style="text-align:center"><code>Single</code></td>
-        <td rowspan="4" style="text-align:center">>0</td>
+        <td rowspan="4" style="text-align:center">≥ 0</td>
         <td style="text-align:center">1</td>
         <td style="text-align:center">Move forward 1 base</td>
         <td rowspan="4" style="text-align:center">Keep</td>
@@ -215,8 +225,20 @@ Teams line up in **Watched Elo** order (Away team on Slots 1-4, then Home team o
 </table>
 
 ## Ending: Time For Overtime?
-If Regulation doesn't break the tie, continue to 8-song **Overtime**.
-If necessary, **repeat** Overtime until a winner is found.
+If Regulation doesn't break the tie, 
+the script will automatically 
+continue to 8-song **Overtime**. 
+Away team bats first again, 
+but each team at-bat starts with
+a runner on **2nd** base and **1** Out. 
+If Overtime doesn’t resolve the tie, 
+consult the following tiebreakers 
+(Tiebreakers 1-4 are determined solely from Overtime results):
+1. Weighted Total Correct (counting Captains twice)
+2. Captains
+3. Non-Captain OP/DP-1s (if the Captains were 17, look for 35)
+4. Cross OP/DP-2s (if 17 then 46)
+5. Home Team (to account for the Away team's first at-bat in Overtime)
 
 ## Format: Best-Of-7, Round Robin, Knockouts
 The script will automatically swap Away and Home teams between consecutive games.
@@ -241,15 +263,7 @@ Install the [Script](#links-balancer-flowchart-script) (**only** the lobby host 
 - Apply the **Regulation** setting code (see [Overview](#overview-those-long-setting-codes)).
 - Invite the right players to the lobby, and make sure they're lined up correctly (see [Lineup](#lineup-away-and-home-captains)).
 - After everyone is ready, type `/mlb howTo` and follow the instructions there.
-- Type `/mlb start` and start playing.
-    - If you started the game by mistake, type `/mlb resetGame`, return to lobby, then type `/mlb start` to restart.
-    - If someone disconnected mid-game, the script will automatically pause the game for you. Wait for them to return and resume the game themselves.
-- If it's tied after Regulation:
-    - Apply the **Overtime** setting code (see [Overview](#overview-those-long-setting-codes)).
-    - Start playing after everyone is ready (**No need to type `/mlb start` to start Overtime unless you reset**).
-    - If you started Overtime by mistake, type `/mlb resetOvertime`, return to lobby, then type `/mlb start` to restart Overtime.
-    - If it's still tied after Overtime, repeat until a winner is found.
-- Type `/mlb export` to download the **Scoresheet**.
-- Open the Scoresheet and copy the top row.
-- Paste it in `#game-reporting` with the Scoresheet and JSON(s) (Regulation and Overtime(s) if necessary).
+- Type `/mlb start` and start playing. If you started the game by mistake, type `/mlb resetGame`, return to lobby, then type `/mlb start` to restart.
+- Type `/nfl export` to download the **Scoresheet**, open it on your browser, and copy the top row.
+- Paste it in `#game-reporting` with the Scoresheet and JSON.
 - Repeat from Step 1 for the next game.
