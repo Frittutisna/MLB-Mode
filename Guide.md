@@ -78,20 +78,16 @@
             <td style="text-align:center">OP/DP Split</td>
             <td style="text-align:center">No</td>
             <td rowspan="3" style="text-align:center">No</td>
-            <td rowspan="2" style="text-align:center">Yes</td>
+            <td rowspan="5" style="text-align:center">Yes</td>
         </tr>
         <tr>
             <td style="text-align:center">DIFF</td>
             <td rowspan="3" style="text-align:center">Yes</td>
         </tr>
-        <tr>
-            <td style="text-align:center">ODIFF</td>
-            <td style="text-align:center">No</td>
-        </tr>
+        <tr><td style="text-align:center">ODIFF</td></tr>
         <tr>
             <td style="text-align:center">TDIFF</td>
             <td style="text-align:center">Yes</td>
-            <td rowspan="2" style="text-align:center">Yes</td>
         </tr>
         <tr>
             <td style="text-align:center">Rouge</td>
@@ -121,7 +117,7 @@
         <tr>
             <td style="text-align:center">Song Mix</td>
             <td style="text-align:center">Random</td>
-            <td colspan="2" style="text-align:center">Watched Equal</td>
+            <td colspan="2" style="text-align:center">Watched <strong>Random</strong></td>
         </tr>
         <tr>
             <td style="text-align:center">Song Difficulty</td>
@@ -143,7 +139,7 @@
         <tr>
             <td style="text-align:center">Song Mix</td>
             <td style="text-align:center">Random</td>
-            <td style="text-align:center">Watched Equal</td>
+            <td style="text-align:center">Watched <strong>Random</strong></td>
             <td style="text-align:center">Random</td>
         </tr>
         <tr>
