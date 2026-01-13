@@ -109,7 +109,7 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
             <td style="text-align:center">No</td>
         </tr>
         <tr>
-            <td rowspan="4" style="text-align:center"><b>REG</b></td>
+            <td rowspan="5" style="text-align:center"><b>REG</b></td>
             <td style="text-align:center">Song Count</td>
             <td style="text-align:center">32</td>
             <td style="text-align:center">12-24</td>
@@ -129,6 +129,11 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
             <td style="text-align:center">Mercy Rule</td>
             <td colspan="2" style="text-align:center">No</td>
             <td style="text-align:center">Yes</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">Base Stealing</td>
+            <td style="text-align:center">Yes</td>
+            <td colspan="2" style="text-align:center">No</td>
         </tr>
         <tr>
             <td rowspan="6" style="text-align:center"><b>OT</b></td>
@@ -199,7 +204,7 @@ Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on
     </tr>
     <tr>
         <td style="text-align:center"><code>Single</code></td>
-        <td rowspan="4" style="text-align:center">≥ 0</td>
+        <td rowspan="5" style="text-align:center">≥ 0</td>
         <td style="text-align:center">1</td>
         <td style="text-align:center">Move forward 1 base</td>
         <td rowspan="4" style="text-align:center">Keep</td>
@@ -216,10 +221,32 @@ Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on
     </tr>
     <tr>
         <td style="text-align:center"><code>Home Run</code></td>
-        <td style="text-align:center">≥4</td>
-        <td style="text-align:center">Move forward 4 bases, score ≥1 run</td>
+        <td style="text-align:center">≥ 4</td>
+        <td style="text-align:center">Move forward 4 bases and Score ≥1 run</td>
+    </tr>
+    <tr>
+        <td style="text-align:center"><code>Steal</code></td>
+        <td style="text-align:center">> 0</td>
+        <td style="text-align:center">Move forward 1 more base or Add 1 Out</td>
+        <td style="text-align:center">Swap on 3rd Out</td>
     </tr>
 </table>
+
+### Steal: Isn't That A Bad Thing?
+<details>
+    <summary><b>Click to know more about Stealing</b></summary>
+    <p>Before the next Song in Regulation, the Pitching Captain 
+    can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code>. 
+    This can only be used against non-at-bat players from the Hitting team 
+    (e.g., on Song 24, Slots 4 and 8 cannot be targeted). 
+    Captains can be targeted twice, but non-Captains can only be targeted once. 
+    Two requirements have to be fulfilled for a Steal attempt to be <b>successful</b>: 
+    the next song must be a <code>Base Hit</code> (not a <code>Strikeout</code>), 
+    and the targeted player must <b>miss</b> the next song. 
+    If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. 
+    If either fails, the Hitting team is <b>Caught Stealing</b> 
+    and surrenders an Out, regardless of Song outcome.</p>
+</details>
 
 ## Ending: Time For Overtime?
 If Regulation doesn't break the tie, 
