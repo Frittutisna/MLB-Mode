@@ -7,7 +7,7 @@
 - [Comparison: What's The Difference?](#comparison-whats-the-difference)
 - [Lineup: Away and Home, Captains](#lineup-away-and-home-captains)
 - [Score: Check the (T)DIFF](#score-check-the-tdiff)
-- [Ending: Time for Overtime?](#ending-time-for-overtime)
+- [Ending: Time for Tiebreakers?](#ending-time-for-tiebreakers)
 - [Format: Best-of-7, Round Robin, Knockouts](#format-best-of-7-round-robin-knockouts)
 - [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do)
 
@@ -19,7 +19,7 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
     - Read further
 - If you're **just watching**: Grab a bowl of popcorn before spectating the lobby of your choice.
 - **Unless you have to, feel more than welcome to stop reading this guide here.** I promise you, unless you **really** have to, you **shouldn't** read the rest of this guide.
-- If you're **hosting the tour** or **hosting a lobby** for your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
+- If you're **hosting the tour**, **hosting a lobby** for your team, or the **Captain** (you have the highest **Watched Elo**) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
 
 ## Links: Balancer, Flowchart, Script
 - [Link to the Balancer](https://github.com/Frittutisna/Balancer)
@@ -38,20 +38,15 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
     </tr>
     <tr>
         <td style="text-align:center">Regulation</td>
-        <td style="text-align:center">32</td>
-        <td rowspan="2" style="text-align:center">20</td>
-        <td rowspan="2" style="text-align:center">0-100</td>
-        <td rowspan="2" style="text-align:center">Random</td>
-        <td rowspan="2" style="text-align:center">
+        <td style="text-align:center">30</td>
+        <td style="text-align:center">20</td>
+        <td style="text-align:center">0-100</td>
+        <td style="text-align:center">Random</td>
+        <td style="text-align:center">
             <details>
                 <summary>Click to view code</summary>
                 <code style="word-break: break-all">e0g14211111001100001431110000001411111111111100k051o000000f11100k012r02i0a46533a11002s0111111111002s0111002s01a111111111102a11111111111hg1ka03-11111--</code>
             </details>
-        </td>
-    </tr>
-    <tr>
-        <td style="text-align:center">Overtime</td>
-        <td style="text-align:center">8</td>
         </td>
     </tr>
 </table>
@@ -69,7 +64,7 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
     </thead>
     <tbody>
         <tr>
-            <td rowspan="11" style="text-align:center"><b>BOTH</b></td>
+            <td rowspan="14" style="text-align:center"><b>BOTH</b></td>
             <td style="text-align:center">Guess Time</td>
             <td style="text-align:center">20</td>
             <td style="text-align:center">10</td>
@@ -79,16 +74,20 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
             <td style="text-align:center">OP/DP Split</td>
             <td style="text-align:center">No</td>
             <td rowspan="3" style="text-align:center">No</td>
-            <td rowspan="5" style="text-align:center">Yes</td>
+            <td rowspan="2" style="text-align:center">Yes</td>
         </tr>
         <tr>
             <td style="text-align:center">DIFF</td>
             <td rowspan="3" style="text-align:center">Yes</td>
         </tr>
-        <tr><td style="text-align:center">ODIFF</td></tr>
+        <tr>
+            <td style="text-align:center">ODIFF</td>
+            <td style="text-align:center">No</td>
+        </tr>
         <tr>
             <td style="text-align:center">TDIFF</td>
             <td style="text-align:center">Yes</td>
+            <td rowspan="2" style="text-align:center">Yes</td>
         </tr>
         <tr>
             <td style="text-align:center">Rouge</td>
@@ -106,19 +105,35 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
         <tr>
             <td style="text-align:center">Base Running</td>
             <td style="text-align:center">Yes</td>
+            <td rowspan="2" style="text-align:center">No</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">Tie</td>
             <td style="text-align:center">No</td>
+            <td style="text-align:center">Yes</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">Last Tiebreaker</td>
+            <td colspan="2" style="text-align:center">Home</td>
+            <td style="text-align:center">Away</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">Estimated Runtime</td>
+            <td style="text-align:center">2 hours</td>
+            <td style="text-align:center">1.5 hours</td>
+            <td style="text-align:center">1 hour</td>
         </tr>
         <tr>
             <td rowspan="5" style="text-align:center"><b>REG</b></td>
             <td style="text-align:center">Song Count</td>
-            <td style="text-align:center">32</td>
-            <td style="text-align:center">12-24</td>
+            <td style="text-align:center">30</td>
+            <td style="text-align:center">15-45</td>
             <td style="text-align:center">9-16</td>
         </tr>
         <tr>
             <td style="text-align:center">Song Mix</td>
             <td style="text-align:center">Random</td>
-            <td colspan="2" style="text-align:center">Watched <strong>Random</strong></td>
+            <td colspan="2" style="text-align:center">Watched (<strong>Random</strong> Distribution)</td>
         </tr>
         <tr>
             <td style="text-align:center">Song Difficulty</td>
@@ -136,34 +151,9 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
             <td colspan="2" style="text-align:center">No</td>
         </tr>
         <tr>
-            <td rowspan="6" style="text-align:center"><b>OT</b></td>
-            <td style="text-align:center">Song Count</td>
-            <td style="text-align:center">8</td>
-            <td style="text-align:center">3-6</td>
-            <td style="text-align:center">1-4</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Song Mix</td>
-            <td style="text-align:center">Random</td>
-            <td style="text-align:center">Watched <strong>Random</strong></td>
-            <td style="text-align:center">Random</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Sudden Death</td>
-            <td rowspan="2" style="text-align:center">No</td>
-            <td rowspan="2" style="text-align:center">No</td>
-            <td rowspan="2" style="text-align:center">Yes</td>
-        </tr>
-        <tr><td style="text-align:center">Tie</td></tr>
-        <tr>
-            <td style="text-align:center">Last Tiebreaker</td>
-            <td colspan="2" style="text-align:center">Home</td>
-            <td style="text-align:center">Away</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Runner on 2nd, 1 Out</td>
-            <td style="text-align:center">Yes</td>
+            <td colspan="2" style="text-align:center"><b>OT</b></td>
             <td colspan="2" style="text-align:center">No</td>
+            <td style="text-align:center">Yes</td>
         </tr>
     </tbody>
 </table>
@@ -235,7 +225,7 @@ Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on
 ### Steal: Isn't That A Bad Thing?
 <details>
     <summary><b>Click to know more about Stealing</b></summary>
-    <p>Before the next Song in Regulation, the Pitching Captain 
+    <p>Before the next Song, the Pitching Captain 
     can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code>. 
     This can only be used against non-at-bat players from the Hitting team 
     (e.g., on Song 24, Slots 4 and 8 cannot be targeted). 
@@ -248,21 +238,14 @@ Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on
     and surrenders an Out, regardless of Song outcome.</p>
 </details>
 
-## Ending: Time For Overtime?
+## Ending: Time For Tiebreakers?
 If Regulation doesn't break the tie, 
-the script will automatically 
-continue to 8-song **Overtime**. 
-Away team bats first again, 
-but each team at-bat starts with
-a runner on **2nd** base and **1** Out. 
-If Overtime doesn’t resolve the tie, 
-consult the following tiebreakers 
-(Tiebreakers 1-4 are determined solely from Overtime results):
+consult the following tiebreakers:
 1. Weighted Total Correct (counting Captains twice)
 2. Captains
 3. Non-Captain OP/DP-1s (if the Captains were 17, look for 35)
 4. Cross OP/DP-2s (if 17 then 46)
-5. Home Team (to account for the Away team's first at-bat in Overtime)
+5. Home Team (to account for the Away team's first at-bat)
 
 ## Format: Best-Of-7, Round Robin, Knockouts
 The script will automatically swap Away and Home teams between consecutive games.
@@ -284,10 +267,13 @@ The script will automatically swap Away and Home teams between consecutive games
 
 ### If you're hosting a lobby for your team:
 Install the [Script](#links-balancer-flowchart-script) (**only** the lobby host needs to install and operate the **Script**) on your browser through TamperMonkey, then do the following:
-- Apply the **Regulation** setting code (see [Overview](#overview-those-long-setting-codes)).
+- Apply the setting code (see [Overview](#overview-those-long-setting-codes)).
 - Invite the right players to the lobby, and make sure they're lined up correctly (see [Lineup](#lineup-away-and-home-captains)).
 - After everyone is ready, type `/mlb howTo` and follow the instructions there.
 - Type `/mlb start` and start playing. If you started the game by mistake, type `/mlb resetGame`, return to lobby, then type `/mlb start` to restart.
-- Type `/nfl export` to download the **Scoresheet**, open it on your browser, and copy the top row.
+- Type `/mlb export` to download the **Scoresheet**, open it on your browser, and copy the top row.
 - Paste it in `#game-reporting` with the Scoresheet and JSON.
 - Repeat from Step 1 for the next game.
+
+### If you're the Captain of your team:
+- See [Steal: Isn't That A Bad Thing?](#steal-isnt-that-a-bad-thing)
