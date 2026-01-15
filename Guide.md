@@ -12,14 +12,14 @@
 - [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do)
 
 ## TLDR: What Is This And What Do I Do?
-In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases*
+In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
 - If you're **just playing**: Join the right lobby, line up correctly, and click Ready. If you're confused about anything, you can (in order of priority):
     - Just play along. People often say this is a game mode best understood through playing, not reading
     - Try `/mlb help` or `/mlb whatIs` in the chat, or
     - Read further
 - If you're **just watching**: Grab a bowl of popcorn before spectating the lobby of your choice.
 - **Unless you have to, feel more than welcome to stop reading this guide here.** I promise you, unless you **really** have to, you **shouldn't** read the rest of this guide.
-- If you're **hosting the tour**, **hosting a lobby** for your team, or the **Captain** (you have the highest **Watched Elo**) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
+- If you're **hosting the tour**, **hosting a lobby** for your team, or the **Captain** (you have the highest **Random** Elo) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
 
 ## Links: Balancer, Flowchart, Script
 - [Link to the Balancer](https://github.com/Frittutisna/Balancer)
@@ -30,6 +30,7 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
 <table style="text-align:center">
     <tr>
         <th style="text-align:center"><strong>Phase</strong></th>
+        <th style="text-align:center"><strong>Estimated Runtime</strong></th>
         <th style="text-align:center"><strong>Song Count</strong></th>
         <th style="text-align:center"><strong>Guess Time</strong></th>
         <th style="text-align:center"><strong>Difficulty</strong></th>
@@ -38,14 +39,15 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
     </tr>
     <tr>
         <td style="text-align:center">Regulation</td>
-        <td style="text-align:center">30</td>
+        <td style="text-align:center">2 hours</td>
+        <td style="text-align:center">25</td>
         <td style="text-align:center">20</td>
         <td style="text-align:center">0-100</td>
         <td style="text-align:center">Random</td>
         <td style="text-align:center">
             <details>
                 <summary>Click to view code</summary>
-                <code style="word-break: break-all">e0g14211111001100001431110000001411111111111100k051o000000f11100k012r02i0a46533a11002s0111111111002s0111002s01a111111111102a11111111111hg1ka03-11111--</code>
+                <code style="word-break: break-all">e0g0p211111001100000p31110000000p11111111111100k051o000000f11100k012r02i0a46533a11002s0111111111002s0111002s01a111111111102a11111111111hg1ka03-11111--</code>
             </details>
         </td>
     </tr>
@@ -55,117 +57,106 @@ In very simple terms: *it's rotating 1v1 Eru Mode with the 3v3 driving the bases
 <table>
     <thead>
         <tr>
-            <th style="text-align:center">Phase</th>
-            <th style="text-align:center">Differences</th>
-            <th style="text-align:center">MLB</th>
-            <th style="text-align:center">NBA</th>
-            <th style="text-align:center">NFL</th>
+            <th style="text-align:center" rowspan="2">Differences</th>
+            <th style="text-align:center" rowspan="2">MLB</th>
+            <th style="text-align:center" rowspan="2">NBA</th>
+            <th style="text-align:center" colspan="2">NFL</th>
+        </tr>
+        <tr>
+            <th style="text-align:center">Regulation</th>
+            <th style="text-align:center">Overtime</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td rowspan="14" style="text-align:center"><b>BOTH</b></td>
-            <td style="text-align:center">Guess Time</td>
-            <td style="text-align:center">20</td>
-            <td style="text-align:center">10</td>
-            <td style="text-align:center">15</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">OP/DP Split</td>
-            <td style="text-align:center">No</td>
-            <td rowspan="3" style="text-align:center">No</td>
-            <td rowspan="2" style="text-align:center">Yes</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">DIFF</td>
-            <td rowspan="3" style="text-align:center">Yes</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">ODIFF</td>
-            <td style="text-align:center">No</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">TDIFF</td>
-            <td style="text-align:center">Yes</td>
-            <td rowspan="2" style="text-align:center">Yes</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Rouge</td>
-            <td rowspan="5" style="text-align:center">No</td>
-            <td style="text-align:center">No</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Hot Streak</td>
-            <td rowspan="4" style="text-align:center">Yes</td>
-            <td rowspan="5" style="text-align:center">No</td>
-        </tr>
-        <tr><td style="text-align:center">Fast Break</td></tr>
-        <tr><td style="text-align:center">Buzzer Beater</td></tr>
-        <tr><td style="text-align:center">Elam Ending</td></tr>
-        <tr>
-            <td style="text-align:center">Base Running</td>
-            <td style="text-align:center">Yes</td>
-            <td rowspan="2" style="text-align:center">No</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Tie</td>
-            <td style="text-align:center">No</td>
-            <td style="text-align:center">Yes</td>
-        </tr>
-        <tr>
-            <td style="text-align:center">Last Tiebreaker</td>
-            <td colspan="2" style="text-align:center">Home</td>
-            <td style="text-align:center">Away</td>
-        </tr>
-        <tr>
             <td style="text-align:center">Estimated Runtime</td>
             <td style="text-align:center">2 hours</td>
             <td style="text-align:center">1.5 hours</td>
-            <td style="text-align:center">1 hour</td>
+            <td style="text-align:center" colspan="2">1 hour</td>
         </tr>
         <tr>
-            <td rowspan="5" style="text-align:center"><b>REG</b></td>
             <td style="text-align:center">Song Count</td>
-            <td style="text-align:center">30</td>
-            <td style="text-align:center">15-45</td>
+            <td style="text-align:center">25</td>
+            <td style="text-align:center">16-40</td>
             <td style="text-align:center">9-16</td>
+            <td style="text-align:center">0-4</td>
         </tr>
         <tr>
-            <td style="text-align:center">Song Mix</td>
-            <td style="text-align:center">Random</td>
-            <td colspan="2" style="text-align:center">Watched (<strong>Random</strong> Distribution)</td>
+            <td style="text-align:center">Guess Time</td>
+            <td style="text-align:center">20</td>
+            <td style="text-align:center">10</td>
+            <td style="text-align:center" colspan="2">15</td>
         </tr>
         <tr>
             <td style="text-align:center">Song Difficulty</td>
             <td style="text-align:center">0-100</td>
-            <td colspan="2" style="text-align:center">0-40</td>
+            <td style="text-align:center" colspan="2">0-40</td>
+            <td style="text-align:center">0-100</td>
         </tr>
+        <tr>
+            <td style="text-align:center">Song Mix</td>
+            <td style="text-align:center">Random</td>
+            <td style="text-align:center" colspan="2" >Watched with <strong>Random</strong> Rig Distribution</td>
+            <td style="text-align:center">Random</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">DIFF</td>
+            <td style="text-align:center" rowspan="4">Yes</td>
+            <td style="text-align:center" rowspan="4">No</td>
+            <td style="text-align:center" colspan="2">Yes</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">ODIFF</td>
+            <td style="text-align:center" colspan="2" rowspan="7">No</td>
+        </tr>
+        <tr><td style="text-align:center">Base Running</td></tr>
+        <tr><td style="text-align:center">Base Stealing</td></tr>
+        <tr>
+            <td style="text-align:center">Hot Streak</td>
+            <td style="text-align:center" rowspan="4">No</td>
+            <td style="text-align:center" rowspan="4">Yes</td>
+        </tr>
+        <tr><td style="text-align:center">Fast Break</td></tr>
+        <tr><td style="text-align:center">Elam Ending</td></tr>
+        <tr><td style="text-align:center">Buzzer Beater</td></tr>
+        <tr>
+            <td style="text-align:center">OP/DP Split</td>
+            <td style="text-align:center" colspan="2" rowspan="5">No</td>
+            <td style="text-align:center" colspan="2" rowspan="2">Yes</td>
+        </tr>
+        <tr><td style="text-align:center">Rouge</td></tr>
         <tr>
             <td style="text-align:center">Mercy Rule</td>
-            <td colspan="2" style="text-align:center">No</td>
             <td style="text-align:center">Yes</td>
+            <td style="text-align:center">No</td>
         </tr>
         <tr>
-            <td style="text-align:center">Base Stealing</td>
-            <td style="text-align:center">Yes</td>
-            <td colspan="2" style="text-align:center">No</td>
+            <td style="text-align:center">Sudden Death</td>
+            <td style="text-align:center">No</td>
+            <td style="text-align:center" rowspan="2">Yes</td>
         </tr>
         <tr>
-            <td colspan="2" style="text-align:center"><b>OT</b></td>
-            <td colspan="2" style="text-align:center">No</td>
-            <td style="text-align:center">Yes</td>
+            <td style="text-align:center">Tie</td>
+            <td style="text-align:center" rowspan="2">N/A</td>
+        </tr>
+        <tr>
+            <td style="text-align:center">Last Tiebreaker</td>
+            <td style="text-align:center">Home</td>
+            <td style="text-align:center">Away</td>
+            <td style="text-align:center">Away</td>
         </tr>
     </tbody>
 </table>
 
 ## Lineup: Away And Home, Captains
-Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on Slots 5-8). **Captains**' (Slots 1 and 5) correct guesses count **double** for (O)DIFF calculations.
+Teams line up in **Random** Elo order (Away team on Slots 1-4, then Home team on Slots 5-8). 
+**Captains**' (Slots 1 and 5) correct guesses count **double** for (O)DIFF calculations.
  
 ## Score: Check the (T)DIFF
 <details>
     <summary><b>Click to know more about Scoring</b></summary>
     <p>The <b>Away</b> team bats first. 
-    Possession (at-bat) swaps only after the 3rd Out for the hitting team.
+    Possession (at-bat) swaps <b>only</b> after the 3rd Out for the Hitting team.
     To determine which player is at-bat, divide the song number by 4. 
     The remainder (1-4, change 0 to 4) 
     indicates the player number (P#) currently hitting.</p>
@@ -235,7 +226,7 @@ Teams line up in **Random Elo** order (Away team on Slots 1-4, then Home team on
     and the targeted player must <b>miss</b> the next song. 
     If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. 
     If either fails, the Hitting team is <b>Caught Stealing</b> 
-    and surrenders an Out, regardless of Song outcome.</p>
+    and surrenders an Out, regardless of the Song outcome.</p>
 </details>
 
 ## Ending: Time For Tiebreakers?
