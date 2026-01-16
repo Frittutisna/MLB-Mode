@@ -233,9 +233,9 @@ Teams line up in **Random** Elo order (Away team on Slots 1-4, then Home team on
 If Regulation doesn't break the tie, 
 consult the following tiebreakers:
 1. Weighted Total Correct (counting Captains twice)
-2. Captains
-3. Non-Captain OP/DP-1s (if the Captains were 17, look for 35)
-4. Cross OP/DP-2s (if 17 then 46)
+2. Captains (Slots 1 vs 5)
+3. T2s (Slots 2 vs 6)
+4. T3s (Slots 3 vs 7)
 5. Home Team (to account for the Away team's first at-bat)
 
 ## Format: Best-Of-7, Round Robin, Knockouts
@@ -259,12 +259,10 @@ The script will automatically swap Away and Home teams between consecutive games
 ### If you're hosting a lobby for your team:
 Install the [Script](#links-balancer-flowchart-script) (**only** the lobby host needs to install and operate the **Script**) on your browser through TamperMonkey, then do the following:
 - Apply the setting code (see [Overview](#overview-those-long-setting-codes)).
-- Invite the right players to the lobby, and make sure they're lined up correctly (see [Lineup](#lineup-away-and-home-captains)).
-- After everyone is ready, type `/mlb howTo` and follow the instructions there.
-- Type `/mlb start` and start playing. If you started the game by mistake, type `/mlb resetGame`, return to lobby, then type `/mlb start` to restart.
-- Type `/mlb export` to download the **Scoresheet**, open it on your browser, and copy the top row.
-- Paste it in `#game-reporting` with the Scoresheet and JSON.
-- Repeat from Step 1 for the next game.
+- Invite the right players to the lobby, make sure they're lined up correctly (see [Lineup](#lineup-away-and-home-captains)), then type `/mlb howTo` and follow the instructions there.
+- After everyone is ready, type `/mlb start` and start playing. If you started the game by mistake, type `/mlb resetGame`, return to lobby, then type `/mlb start` to restart.
+- The Script will automatically download the **Scoresheet** after each Game. Open it on your browser, copy the top row, then paste it in `#game-reporting` with the Scoresheet and JSON.
+- Repeat from Step 1 for a new lobby, from Step 2 for the same lobby and a new opponent, or from Step 3 for the same lobby and opponent.
 
 ### If you're the Captain of your team:
 - See [Steal: Isn't That A Bad Thing?](#steal-isnt-that-a-bad-thing)
