@@ -206,17 +206,17 @@ The team listed first (above) on Challonge is the **Away** team for each series.
 ### Steal: Isn't That A Bad Thing?
 <details>
     <summary><b>Click to know more about Stealing</b></summary>
-    <p>Before the next Song, the Pitching Captain 
+    <p>Before the next Song, the Hitting Captain 
     can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code>. 
-    This can only be used against non-at-bat players from the Hitting team 
-    (e.g., on Song 24, Slots 4 and 8 cannot be targeted). 
+    This can only be used against non-at-bat players from the Pitching team 
+    (e.g., on Song 14, Slots 2 and 6 cannot be targeted). 
     Captains can be targeted twice, but non-Captains can only be targeted once. 
     Two requirements have to be fulfilled for a Steal attempt to be <b>successful</b>: 
     the next song must be a <code>Base Hit</code> (not a <code>Strikeout</code>), 
     and the targeted player must <b>miss</b> the next song. 
     If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. 
     If either fails, the Hitting team is <b>Caught Stealing</b> 
-    and surrenders an Out, regardless of the Song outcome.</p>
+    and the song is automatically ruled as an Out.</p>
 </details>
 
 ## Ending: Time For Tiebreakers?
