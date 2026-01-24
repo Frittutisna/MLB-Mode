@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0.alpha.5
+// @version      0-alpha.6
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -17,8 +17,8 @@
         gameNumber          : 1,
         hostId              : 0,
         teamNames           : {away: "Away", home: "Home"},
-        captains            : [1, 5], // Slots 1 and 5 are Captains
-        totalSongs          : 30,     // Fixed at 30 songs
+        captains            : [1, 5], 
+        totalSongs          : 30,     
         isSwapped           : false,
         isTest              : false,
         seriesLength        : 7,
@@ -43,7 +43,7 @@
         gameNumber      : 1,
         songNumber      : 0,
         totalScore      : {away: 0, home: 0},
-        inning          : {outs: 0, bases: [false, false, false]}, 
+        inning          : {outs: 0, bases: [false, false, false]}, // [1st, 2nd, 3rd]
         possession      : 'away', 
         history         : [],
         pendingPause    : false,
@@ -79,6 +79,7 @@
         "double"            : "TDIFF = 2. Move forward 2 bases.",
         "triple"            : "TDIFF = 3. Move forward 3 bases.",
         "home run"          : "TDIFF ≥ 4. Move forward 4 bases (Score run).",
+        "grand slam"        : "A Home Run with bases loaded (4 runs scored).",
         "steal"             : "Captain command. If successful (Hit + Target Miss), adds +1 Base to hit.",
         "caught stealing"   : "Failed steal attempt. Adds 1 Out.",
         "retired"           : "The result when the 3rd Out is recorded.",
@@ -374,7 +375,6 @@
             chatMessage(`Type "/mlb start" to start Game ${config.gameNumber}`);
         }
 
-        // Return to lobby ONLY if it ended early (Mercy Rule)
         if (match.songNumber < config.totalSongs) {
             sendGameCommand("pause game");
             setTimeout(() => sendGameCommand("return to lobby"), config.delay);
@@ -563,10 +563,8 @@
         
         let guarantee = 0;
         if (match.possession === trailingSide) {
-            // If trailing team is batting, max potential is remaining songs (1 run per song)
             guarantee = config.totalSongs - match.songNumber;
         } else {
-            // If leading team is batting, trailing team must burn songs to get outs
             const burned = 3 - match.inning.outs;
             guarantee = (config.totalSongs - match.songNumber) - burned;
         }
@@ -599,8 +597,19 @@
         const stateStr = `${baseStr}-${match.inning.outs}`;
 
         let resStr = "";
-        if (rbi > 0) resStr += (rbi === 1 ? "RBI " : `${rbi}RBI `);
-        resStr += resultName;
+        if (rbi > 0) {
+            // New syntax: 2-RBI etc.
+            // Home Run special case
+            if (resultName.includes("Home Run")) {
+                if (rbi === 4) resStr = "Grand Slam";
+                else if (rbi > 1) resStr = `${rbi}-Run Home Run`;
+                else resStr = "Home Run"; // 1-Run
+            } else {
+                resStr = `${rbi}-RBI ${resultName}`;
+            }
+        } else {
+            resStr = resultName;
+        }
 
         let displayScore = config.isSwapped ? `${match.totalScore.home}-${match.totalScore.away}` : `${match.totalScore.away}-${match.totalScore.home}`;
 
@@ -623,7 +632,6 @@
             
             nextMsg = ` | Next: ${nHName} vs ${nPName}`;
             
-            // Warning only if NOT about to end naturally
             if (mercyWarning && nextSong < config.totalSongs) {
                 nextMsg += ` | Mercy Rule Warning`;
                 match.pendingPause = true;
@@ -631,6 +639,20 @@
         } 
 
         let fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
+
+        // History snapshot
+        const awayRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i-1] : gameConfig.awaySlots[i-1]) ? 1 : 0);
+        const homeRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i-1] : gameConfig.homeSlots[i-1]) ? 1 : 0);
+        
+        // Save history before potential swap resets
+        match.history.push({
+            song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
+            awayArr: awayRaw, homeArr: homeRaw,
+            scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
+            result: resStr.trim(),
+            bases: [...match.inning.bases], // snapshot [1st, 2nd, 3rd]
+            outs: match.inning.outs
+        });
 
         // Game Winner Logic (Combined Line)
         if (isGameEnd) {
@@ -674,29 +696,10 @@
              fullMsg += ` | Game Winner: ${wName}${sMsg}`;
              
              chatMessage(fullMsg);
-             
-             const awayRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i-1] : gameConfig.awaySlots[i-1]) ? 1 : 0);
-             const homeRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i-1] : gameConfig.homeSlots[i-1]) ? 1 : 0);
-             match.history.push({
-                song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
-                awayArr: awayRaw, homeArr: homeRaw,
-                scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
-                result: resStr.trim()
-             });
-
              finalizeGame(winnerSide);
 
         } else {
              chatMessage(fullMsg);
-
-             const awayRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i-1] : gameConfig.awaySlots[i-1]) ? 1 : 0);
-             const homeRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i-1] : gameConfig.homeSlots[i-1]) ? 1 : 0);
-             match.history.push({
-                song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
-                awayArr: awayRaw, homeArr: homeRaw,
-                scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
-                result: resStr.trim() 
-             });
 
              match.steal.active = false;
              match.steal.targetSlot = null;
@@ -751,8 +754,11 @@
         
         const lastEntry     = match.history[match.history.length - 1];
         let titleScore = "";
-        if (effSwapped) titleScore = `${lastEntry.scoreHome}-${lastEntry.scoreAway}`;
-        else            titleScore = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
+        
+        // FIXED: Do not swap score numbers, only names. 
+        // match.scores tracks Visual Away / Visual Home.
+        // so row.scoreAway is always the score of 'awayNameClean'.
+        titleScore = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
         
         const titleStr = `Game ${effGameNum} (${match.history.length}): ${awayNameClean} ${titleScore} ${homeNameClean}`;
         const subHeaders = gameConfig.posNames; 
@@ -771,18 +777,21 @@
         <body>
             <table>
                 <thead>
-                    <tr><th colspan="13" style="font-size: 1.5em; font-weight: bold;">${titleStr}</th></tr>
+                    <tr><th colspan="17" style="font-size: 1.5em; font-weight: bold;">${titleStr}</th></tr>
                     <tr>
                         <th rowspan="2">Song</th>
                         <th rowspan="2">Pitching</th>
                         <th colspan="4">${awayNameClean}</th>
                         <th colspan="4">${homeNameClean}</th>
+                        <th colspan="3">Bases</th>
+                        <th rowspan="2">Outs</th>
                         <th rowspan="2">Result</th>
                         <th colspan="2">Score</th>
                     </tr>
                     <tr>
                         ${subHeaders.map(h => `<th>${h}</th>`).join('')}
                         ${subHeaders.map(h => `<th>${h}</th>`).join('')}
+                        <th>3</th><th>2</th><th>1</th>
                         <th>${awayNameClean}</th>
                         <th>${homeNameClean}</th>
                     </tr>
@@ -792,16 +801,26 @@
 
         match.history.forEach(row => {
             const generateCells = (valuesArr) => {return valuesArr.map(val => {return `<td>${val === 0 ? "" : val}</td>`}).join('');};
-            const leftArr   = effSwapped ? row.homeArr : row.awayArr;
-            const rightArr  = effSwapped ? row.awayArr : row.homeArr;
-            const sAway     = effSwapped ? row.scoreHome : row.scoreAway;
-            const sHome     = effSwapped ? row.scoreAway : row.scoreHome;
+            // Left/Right arrays must swap if team names swapped?
+            // match.history stores 'awayArr' (Visual Away) and 'homeArr' (Visual Home).
+            // So if effSwapped, visual Away IS correct for Left. No swap needed for arrays either.
+            const leftArr   = row.awayArr;
+            const rightArr  = row.homeArr;
             
+            const sAway     = row.scoreAway;
+            const sHome     = row.scoreHome;
+            
+            // Bases: stored as [1st, 2nd, 3rd] -> Display [3, 2, 1]
+            const b = row.bases;
+            const basesHtml = `<td>${b[2]?1:""}</td><td>${b[1]?1:""}</td><td>${b[0]?1:""}</td>`;
+
             html += `<tr>
                     <td>${row.song}</td>
                     <td>${getCleanTeamName(row.pitchingTeam)}</td>
                     ${generateCells(leftArr)}
                     ${generateCells(rightArr)}
+                    ${basesHtml}
+                    <td>${row.outs}</td>
                     <td>${row.result}</td> 
                     <td>${sAway}</td>
                     <td>${sHome}</td>
@@ -837,11 +856,6 @@
         
         const teamNum = pObj.teamNumber;
         
-        // --- FIXED PERMISSION LOGIC ---
-        // Determine who is currently hitting based on possession
-        // If swapped, logic is consistent, but slots shift meaning.
-        // Hitting Slots: The slots corresponding to match.possession.
-        
         const currentAwaySlots = config.isSwapped ? gameConfig.homeSlots : gameConfig.awaySlots;
         const currentHomeSlots = config.isSwapped ? gameConfig.awaySlots : gameConfig.homeSlots;
         
@@ -857,7 +871,7 @@
             return;
         }
 
-        const hittingSide = match.possession; // Used for limits
+        const hittingSide = match.possession; 
         if (match.stealLimits[hittingSide] <= 0) {
             chatMessage("Error: No steal attempts remaining (Max 5).");
             return;
