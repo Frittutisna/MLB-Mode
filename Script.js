@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0.alpha.3
+// @version      0-alpha.4
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -374,7 +374,14 @@
             chatMessage(`Type "/mlb start" to start Game ${config.gameNumber}`);
         }
 
-        sendGameCommand("pause game");
+        // Return to lobby ONLY if it ended early (Mercy Rule)
+        // match.songNumber has already been incremented in processRound, so check against totalSongs
+        if (match.songNumber < config.totalSongs) {
+            sendGameCommand("pause game");
+            setTimeout(() => sendGameCommand("return to lobby"), config.delay);
+        } else {
+            sendGameCommand("pause game");
+        }
     };
 
     const validateLobby = () => {
@@ -566,7 +573,7 @@
         if (guarantee < 0) guarantee = 0;
 
         const mercyTriggered = (deficit > guarantee);
-        const mercyWarning   = (deficit === guarantee && !mercyTriggered); // On the brink
+        const mercyWarning   = (deficit === guarantee && !mercyTriggered); 
 
         // --- Formatting String ---
         const directStr = `${hVal}-${pVal}`;
@@ -674,7 +681,8 @@
              match.history.push({
                 song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
                 awayArr: awayRaw, homeArr: homeRaw,
-                scoreAway: match.totalScore.away, scoreHome: match.totalScore.home // Save snapshot for HTML
+                scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
+                result: resStr.trim() // Save text result for HTML
              });
 
              finalizeGame(winnerSide);
@@ -687,7 +695,8 @@
              match.history.push({
                 song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
                 awayArr: awayRaw, homeArr: homeRaw,
-                scoreAway: match.totalScore.away, scoreHome: match.totalScore.home
+                scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
+                result: resStr.trim() 
              });
 
              match.steal.active = false;
@@ -699,7 +708,7 @@
                 match.inning.bases = [false, false, false];
              }
 
-             if (wasPendingPause) sendGameCommand("pause game");
+             if (wasPendingPause) sendGameCommand("resume game");
         }
     };
 
@@ -709,8 +718,30 @@
             return;
         }
 
-        const awayNameClean = config.teamNames.away;
-        const homeNameClean = config.teamNames.home;
+        let effGameNum = config.gameNumber;
+        let effSwapped = config.isSwapped;
+
+        if (!match.isActive) {
+             // If series not finished, gameNumber has likely been incremented by finalizeGame
+             // Check series stats to see if series is over
+             const sStats = config.seriesStats;
+             const winThreshold = Math.ceil(config.seriesLength / 2);
+             const isOver = sStats.awayWins >= winThreshold || sStats.homeWins >= winThreshold || sStats.history.length >= config.seriesLength;
+             
+             if (!isOver && match.history.length > 0) {
+                 effGameNum = config.gameNumber - 1;
+                 if (config.seriesLength > 1) effSwapped = !config.isSwapped;
+             }
+        }
+        if (effGameNum < 1) effGameNum = 1;
+
+        const getEffCleanName = (side) => {
+            if (effSwapped) return side === 'away' ? config.teamNames.home : config.teamNames.away;
+            return config.teamNames[side];
+        };
+
+        const awayNameClean = getEffCleanName('away');
+        const homeNameClean = getEffCleanName('home');
         
         const date  = new Date();
         const yy    = String(date.getFullYear   ())     .slice      (2);
@@ -719,15 +750,14 @@
         
         const safeAway      = awayNameClean.replace(/[^a-z0-9]/gi, '_');
         const safeHome      = homeNameClean.replace(/[^a-z0-9]/gi, '_');
-        const fileName      = `${yy}${mm}${dd}-${match.gameNumber}-${safeAway}-${safeHome}.html`;
+        const fileName      = `${yy}${mm}${dd}-${effGameNum}-${safeAway}-${safeHome}.html`;
         
-        // Final Score for Title
-        const lastEntry = match.history[match.history.length - 1];
+        const lastEntry     = match.history[match.history.length - 1];
         let titleScore = "";
-        if (config.isSwapped) titleScore = `${lastEntry.scoreHome}-${lastEntry.scoreAway}`;
-        else titleScore = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
+        if (effSwapped) titleScore = `${lastEntry.scoreHome}-${lastEntry.scoreAway}`;
+        else            titleScore = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
         
-        const titleStr = `Game ${match.gameNumber} (${match.history.length}): ${awayNameClean} ${titleScore} ${homeNameClean}`;
+        const titleStr = `Game ${effGameNum} (${match.history.length}): ${awayNameClean} ${titleScore} ${homeNameClean}`;
         const subHeaders = gameConfig.posNames; 
 
         let html = `
@@ -765,18 +795,17 @@
 
         match.history.forEach(row => {
             const generateCells = (valuesArr) => {return valuesArr.map(val => {return `<td>${val === 0 ? "" : val}</td>`}).join('');};
-            const leftArr   = config.isSwapped ? row.homeArr : row.awayArr;
-            const rightArr  = config.isSwapped ? row.awayArr : row.homeArr;
-            // Handle Score Swapping
-            const sAway     = config.isSwapped ? row.scoreHome : row.scoreAway;
-            const sHome     = config.isSwapped ? row.scoreAway : row.scoreHome;
+            const leftArr   = effSwapped ? row.homeArr : row.awayArr;
+            const rightArr  = effSwapped ? row.awayArr : row.homeArr;
+            const sAway     = effSwapped ? row.scoreHome : row.scoreAway;
+            const sHome     = effSwapped ? row.scoreAway : row.scoreHome;
             
             html += `<tr>
                     <td>${row.song}</td>
                     <td>${getCleanTeamName(row.pitchingTeam)}</td>
                     ${generateCells(leftArr)}
                     ${generateCells(rightArr)}
-                    <td>-</td> 
+                    <td>${row.result}</td> 
                     <td>${sAway}</td>
                     <td>${sHome}</td>
                 </tr>`;
@@ -794,6 +823,12 @@
         const relSlot = parseInt(arg);
         if (isNaN(relSlot) || relSlot < 1 || relSlot > 4) {
             chatMessage("Usage: /mlb steal [1-4]");
+            return;
+        }
+
+        // LOCK CHECK
+        if (match.steal.active) {
+            chatMessage("Error: A steal attempt has already been locked in for the next song.");
             return;
         }
 
