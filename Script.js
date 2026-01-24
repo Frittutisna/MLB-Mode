@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-alpha.7
+// @version      0-beta.0.0
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -43,7 +43,7 @@
         gameNumber      : 1,
         songNumber      : 0,
         totalScore      : {away: 0, home: 0},
-        inning          : {outs: 0, bases: [false, false, false]}, // [1st, 2nd, 3rd]
+        inning          : {outs: 0, bases: [false, false, false]},
         possession      : 'away', 
         history         : [],
         pendingPause    : false,
@@ -58,32 +58,40 @@
     };
 
     const gameConfig = {
-        awaySlots           : [1, 2, 3, 4],
-        homeSlots           : [5, 6, 7, 8],
-        posNames            : ["T1", "T2", "T3", "T4"] 
+        awaySlots   : [1,       2,      3,      4],
+        homeSlots   : [5,       6,      7,      8],
+        posNames    : ["T1",    "T2",   "T3",   "T4"] 
     };
 
     const TERMS = {
-        "away"              : "The team before the @ sign. Bats first.",
-        "home"              : "The team after the @ sign. Bats second.",
-        "possession"        : "The state of being At-Bat (Hitting). Swaps after 3 Outs.",
-        "hitting"           : "The team currently At-Bat.",
-        "pitching"          : "The team currently defending (fielding).",
-        "captain"           : "Slots 1 and 5. Correct guesses count x2 (Double Multiplier) for DIFF and ODIFF.",
-        "diff"              : "Hitting P# Score - Pitching P# Score (1v1 Matchup).",
-        "odiff"             : "Hitting Non-Batters - Pitching Non-Batters (Team Support). Only counts if DIFF ≥ 0.",
-        "tdiff"             : "DIFF + max(0, ODIFF). Determines hit type.",
-        "strikeout"         : "DIFF < 0. Adds 1 Out.",
-        "flyout"            : "DIFF ≥ 0 but TDIFF = 0. Adds 1 Out.",
-        "single"            : "TDIFF = 1. Move forward 1 base.",
-        "double"            : "TDIFF = 2. Move forward 2 bases.",
-        "triple"            : "TDIFF = 3. Move forward 3 bases.",
-        "home run"          : "TDIFF ≥ 4. Move forward 4 bases (Score run).",
-        "grand slam"        : "A Home Run with bases loaded (4 runs scored).",
-        "steal"             : "Captain command. If successful (Hit + Target Miss), adds +1 Base to hit.",
-        "caught stealing"   : "Failed steal attempt. Adds 1 Out.",
-        "retired"           : "The result when the 3rd Out is recorded.",
-        "mercy rule"        : "Game ends if trailing team cannot mathematically catch up (Max 1 run per remaining song).",
+        "away"              : "The team before the @ sign. Bats first",
+        "home"              : "The team after the @ sign. Bats second",
+        "batter"            : "The player currently batting. Cycles every 4 Songs. Needs to at least match the Pitcher to potentially score a Hit (and by extension Run(s))",
+        "pitcher"           : "The player currently pitching. Cycles every 4 Songs. Needs to beat the Batter to deny a Hit and score a Strikeout",
+        "hit"               : "Any outcome that doesn't add an Out; can score Run(s)",
+        "non-batters"       : "Teammates of the Batter. Can improve (but not harm) a Hit",
+        "non-pitchers"      : "Teammates of the Pitcher. Can prevent the non-Batters from improving a Hit",
+        "hitting"           : "The team currently attacking. Swaps after 3 Outs",
+        "pitching"          : "The team currently defending. Swaps after 3 Outs",
+        "captain"           : "Slots 1 and 5. Can use the Steal command against Pitching Non-Pitchers. Correct guesses count double for (O)DIFF",
+        "diff"              : "Hitting Batter - Pitching Pitcher, 1v1. Strikeout if < 0",
+        "odiff"             : "Hitting Non-Batters - Pitching Non-Pitchers, 3v3. Only counts if DIFF ≥ 0",
+        "tdiff"             : "DIFF + max(0, ODIFF). Determines hit type: Home Run > Triple > Double > Single > Flyout",
+        "strikeout"         : "DIFF < 0. Adds 1 Out",
+        "flyout"            : "DIFF = TDIFF = 0. Adds 1 Out",
+        "single"            : "TDIFF = 1. Move forward 1 base",
+        "double"            : "TDIFF = 2. Move forward 2 bases",
+        "triple"            : "TDIFF = 3. Move forward 3 bases",
+        "home run"          : "TDIFF ≥ 4. Move forward 4 bases and score run(s)",
+        "grand slam"        : "4-Run Home Run",
+        "rbi"               : "Run(s) Batted In",
+        "run"               : "See RBI. Whoever has more Runs at the end of the Game wins",
+        "tiebreaker"        : "Weighted Total > Captains > T2s > T3s > Pitching",
+        "weighted total"    : "Total team correct, counting Captains twice",
+        "steal"             : "Hitting Captain command to target Pitching Non-Pitchers (Captains can be targeted twice, others once). If successful (DIFF ≥ 0 and target missed), add +1 Base to hit. If failed, Song is ruled an Out",
+        "caught stealing"   : "Failed Steal attempt",
+        "retired"           : "3rd Out. Swaps Hitting and Pitching teams for the next Song",
+        "mercy rule"        : "Ends the Game early if the trailing team cannot catch up",
     };
 
     const COMMAND_DESCRIPTIONS = {
@@ -129,15 +137,15 @@
 
     const getPlayerNameAtTeamId = (teamId) => {
         if      (typeof quiz !== 'undefined' && quiz.inQuiz)    {
-            const p = Object.values(quiz.players).find(player => player.teamNumber == teamId);
+            const p = Object.values(quiz.players)   .find(player => player.teamNumber       == teamId);
             if (p) return p.name;
         }
         else if (typeof lobby !== 'undefined' && lobby.inLobby) {
-            const p = Object.values(lobby.players).find(player => getTeamNumber(player) == teamId);
+            const p = Object.values(lobby.players)  .find(player => getTeamNumber(player)   == teamId);
             if (p) return p.name;
         }
         if      (playersCache.length > 0)                       {
-            const p = playersCache.find(player => player.teamNumber == teamId);
+            const p = playersCache                  .find(player => player.teamNumber       == teamId);
             if (p) return p.name;
         }
         return `Player ${teamId}`;
@@ -308,7 +316,6 @@
 
         const awayW = getWeighted('away');
         const homeW = getWeighted('home');
-
         if (awayW !== homeW) {
             chatMessage(`Tiebreaker: ${getCleanTeamName(awayW > homeW ? 'away' : 'home')} wins on Weighted Total (${awayW}-${homeW})`);
             return awayW > homeW ? 'away' : 'home';
@@ -338,8 +345,7 @@
         }
 
         const lastEntry = match.history[match.history.length - 1];
-        const winner = lastEntry.pitchingTeam; 
-        
+        const winner    = lastEntry.pitchingTeam; 
         chatMessage(`Tiebreaker: ${getCleanTeamName(winner)} wins on Pitching Tiebreaker`);
         return winner;
     };
@@ -353,8 +359,8 @@
             let actualWinnerSide = winnerSide;
 
             if (config.isSwapped) {
-                 if         (winnerSide === 'away') actualWinnerSide = 'home';
-                 else if    (winnerSide === 'home') actualWinnerSide = 'away';
+                if      (winnerSide === 'away') actualWinnerSide = 'home';
+                else if (winnerSide === 'home') actualWinnerSide = 'away';
             }
 
             if      (actualWinnerSide === 'away') config.seriesStats.awayWins++;
@@ -399,7 +405,7 @@
         resetMatchData();
         match.isActive      = true;
         match.gameNumber    = config.gameNumber;
-        chatMessage(`Game ${config.gameNumber}: ${getCleanTeamName('away')} @ ${getCleanTeamName('home')} - Play Ball!`);
+        chatMessage(`Game ${config.gameNumber}: ${getCleanTeamName('away')} @ ${getCleanTeamName('home')} is close to the opening pitch!`);
     };
 
     const printHowTo = () => {
@@ -410,9 +416,7 @@
         systemMessage("5. /mlb start: Start the game");
     };
 
-    const getBatterIndex = (songNum) => {
-        return (songNum - 1) % 4;
-    };
+    const getBatterIndex = (songNum) => {return (songNum - 1) % 4};
 
     const getStealLimitsString = () => {
         const arr = match.targetLimits;
@@ -442,8 +446,8 @@
 
         const checkSlot = (slotId) => {
             let p = null;
-            if (typeof quiz !== 'undefined') p = Object.values(quiz.players).find(x => x.teamNumber == slotId);
-            if (!p) p = playersCache.find(x => x.teamNumber == slotId);
+            if (typeof quiz !== 'undefined')    p = Object.values(quiz.players).find(x => x.teamNumber == slotId);
+            if (!p)                             p = playersCache.find(x => x.teamNumber == slotId);
             return p && resultsMap[p.gamePlayerId] === true;
         };
 
@@ -456,7 +460,6 @@
         const pVal = pitchingCorrect ? (isPitchingCaptain ? 2 : 1) : 0;
         const diff = hVal - pVal;
 
-        // --- Steal Resolution ---
         let stealOutcome = null; 
         let extraBase    = 0;
         let caught       = false;
@@ -464,16 +467,15 @@
         if (match.steal.active) {
             const targetCorrect = checkSlot(match.steal.targetSlot);
             
-            if (diff >= 0 && !targetCorrect) {
-                stealOutcome = 'success';
-                extraBase    = 1;
-            } else if (diff < 0 || targetCorrect) {
-                stealOutcome = 'fail';
-                caught       = true;
+            if          (diff >=    0 && !targetCorrect)    {
+                stealOutcome    = 'success';
+                extraBase       = 1;
+            } else if   (diff <     0 || targetCorrect)     {
+                stealOutcome    = 'fail';
+                caught          = true;
             }
         }
 
-        // --- ODIFF Calculation ---
         let odiff       = 0;
         let hSupArr     = [];
         let pSupArr     = [];
@@ -483,55 +485,50 @@
             let arr = [];
             slots.forEach(s => {
                 if (s !== batterSlotId) {
-                    const c = checkSlot(s);
-                    const val = c ? (config.captains.includes(s) ? 2 : 1) : 0;
-                    score += val;
+                    const c     =   checkSlot(s);
+                    const val   =   c ? (config.captains.includes(s) ? 2 : 1) : 0;
+                    score       +=  val;
                     arr.push(val);
                 }
             });
             return {score, arr};
         };
 
-        const hSupObj = getSupport(hittingSlots, hittingSlot);
-        const pSupObj = getSupport(pitchingSlots, pitchingSlot);
-        hSupArr  = hSupObj.arr;
-        pSupArr  = pSupObj.arr;
+        const hSupObj = getSupport(hittingSlots,    hittingSlot);
+        const pSupObj = getSupport(pitchingSlots,   pitchingSlot);
 
-        if (diff >= 0) {
-            odiff = hSupObj.score - pSupObj.score;
-        }
+        hSupArr = hSupObj.arr;
+        pSupArr = pSupObj.arr;
 
-        // --- TDIFF & Outcome ---
-        let tdiff = diff + Math.max(0, odiff);
+        if (diff >= 0) odiff = hSupObj.score - pSupObj.score;
+        let tdiff       = diff + Math.max(0, odiff);
+        let moveBases   = 0;
+        let resultName  = "";
+        let isOut       = false;
         
-        let moveBases = 0;
-        let resultName = "";
-        let isOut = false;
-        
-        if (diff < 0) {
-            isOut = true;
-            resultName = "Strikeout";
-        } else if (caught) {
-            isOut = true;
-            resultName = "Caught Stealing";
+        if          (diff < 0)  {
+            isOut       = true;
+            resultName  = "Strikeout";
+        } else if   (caught)    {
+            isOut       = true;
+            resultName  = "Caught Stealing";
         } else {
             if (tdiff === 0) {
-                isOut = true;
-                resultName = "Flyout";
+                isOut       = true;
+                resultName  = "Flyout";
             } else {
                 const hitVal = tdiff + extraBase;
-                if      (hitVal >= 4) {moveBases = 4; resultName = "Home Run";}
-                else if (hitVal === 3){moveBases = 3; resultName = "Triple";}
-                else if (hitVal === 2){moveBases = 2; resultName = "Double";}
-                else                  {moveBases = 1; resultName = "Single";}
+                if      (hitVal >=  4)  {moveBases = 4; resultName = "Home Run"}
+                else if (hitVal === 3)  {moveBases = 3; resultName = "Triple"}
+                else if (hitVal === 2)  {moveBases = 2; resultName = "Double"}
+                else                    {moveBases = 1; resultName = "Single"}
             }
         }
 
         if (stealOutcome === 'success' && !isOut) resultName = "Steal " + resultName;
 
-        // --- State Update ---
-        let runsScored = 0;
-        let rbi = 0;
+        let runsScored  = 0;
+        let rbi         = 0;
         
         if (isOut) {
             match.inning.outs++;
@@ -541,94 +538,78 @@
             for (let i = 2; i >= 0; i--) {
                 if (match.inning.bases[i]) {
                     const dest = i + moveBases;
-                    if (dest >= 3) {runsScored++; rbi++;} 
-                    else {newBases[dest] = true;}
+                    if (dest >= 3) {runsScored++; rbi++} 
+                    else newBases[dest] = true;
                 }
             }
             const batterDest = moveBases - 1;
-            if (batterDest >= 3) {runsScored++; rbi++;} 
-            else {newBases[batterDest] = true;}
+            if (batterDest >= 3) {runsScored++; rbi++} 
+            else newBases[batterDest] = true;
             match.inning.bases = newBases;
         }
 
         if (runsScored > 0) {
-            if (match.possession === 'away') match.totalScore.away += runsScored;
-            else                             match.totalScore.home += runsScored;
+            if (match.possession === 'away')    match.totalScore.away += runsScored;
+            else                                match.totalScore.home += runsScored;
         }
 
-        // --- Mercy Rule Check ---
-        const trailingSide = (match.totalScore.away > match.totalScore.home) ? 'home' : 'away';
-        const leaderSide   = (trailingSide === 'away') ? 'home' : 'away';
-        const deficit      = match.totalScore[leaderSide] - match.totalScore[trailingSide];
+        const trailingSide  = (match.totalScore.away > match.totalScore.home)   ? 'home' : 'away';
+        const leaderSide    = (trailingSide === 'away')                         ? 'home' : 'away';
+        const deficit       = match.totalScore[leaderSide] - match.totalScore[trailingSide];
         
         let guarantee = 0;
-        if (match.possession === trailingSide) {
-            guarantee = config.totalSongs - match.songNumber;
-        } else {
-            const burned = 3 - match.inning.outs;
-            guarantee = (config.totalSongs - match.songNumber) - burned;
+        if (match.possession === trailingSide) guarantee = config.totalSongs - match.songNumber;
+        else {
+            const burned    = 3 - match.inning.outs;
+            guarantee       = (config.totalSongs - match.songNumber) - burned;
         }
         if (guarantee < 0) guarantee = 0;
 
-        const mercyTriggered = (deficit > guarantee);
-        const mercyWarning   = (deficit === guarantee && !mercyTriggered); 
-
-        // --- Formatting String ---
-        const directStr = `${hVal}-${pVal}`;
-        let hSupStr = hSupArr.join("");
-        let pSupStr = "";
+        const mercyTriggered    = (deficit > guarantee);
+        const mercyWarning      = (deficit === guarantee && !mercyTriggered); 
+        const directStr         = `${hVal}-${pVal}`;
+        let hSupStr             = hSupArr.join("");
+        let pSupStr             = "";
         
         let pSupIdx = 0;
         pitchingSlots.forEach(slot => {
             if (slot !== pitchingSlot) {
                 const val = pSupArr[pSupIdx];
-                if (match.steal.active && match.steal.targetSlot === slot) {
-                    pSupStr += `(${val})`;
-                } else {
-                    pSupStr += val;
-                }
+                if (match.steal.active && match.steal.targetSlot === slot)  pSupStr += `(${val})`;
+                else                                                        pSupStr += val;
                 pSupIdx++;
             }
         });
 
-        const supportStr = `${hSupStr}-${pSupStr}`;
-        const b = match.inning.bases;
-        const baseStr = `${b[2]?1:0}${b[1]?1:0}${b[0]?1:0}`;
-        const stateStr = `${baseStr}-${match.inning.outs}`;
+        const supportStr    = `${hSupStr}-${pSupStr}`;
+        const b             = match.inning.bases;
+        const baseStr       = `${b[2]?1:0}${b[1]?1:0}${b[0]?1:0}`;
+        const stateStr      = `${baseStr}-${match.inning.outs}`;
 
         let resStr = "";
         if (rbi > 0) {
             if (resultName.includes("Home Run")) {
-                if (rbi === 4) resStr = "Grand Slam";
-                else if (rbi > 1) resStr = `${rbi}-Run Home Run`;
-                else resStr = "Home Run"; 
-            } else {
-                resStr = (rbi === 1 ? "RBI " : `${rbi}-RBI `) + resultName;
-            }
-        } else {
-            resStr = resultName;
-        }
+                if (rbi === 4)      resStr = "Grand Slam";
+                else if (rbi > 1)   resStr = `${rbi}-Run Home Run`;
+                else                resStr = "Home Run"; 
+            } else                  resStr = (rbi === 1 ? "RBI " : `${rbi}-RBI `) + resultName;
+        } else                      resStr = resultName;
 
-        let displayScore = config.isSwapped ? `${match.totalScore.home}-${match.totalScore.away}` : `${match.totalScore.away}-${match.totalScore.home}`;
-
-        // Next Matchup
-        let nextSong = match.songNumber + 1;
-        let nextMsg = "";
-        const isGameEnd = match.songNumber >= config.totalSongs || mercyTriggered;
+        let displayScore    = config.isSwapped ? `${match.totalScore.home}-${match.totalScore.away}` : `${match.totalScore.away}-${match.totalScore.home}`;
+        let nextSong        = match.songNumber + 1;
+        let nextMsg         = "";
+        const isGameEnd     = match.songNumber >= config.totalSongs || mercyTriggered;
 
         if (!isGameEnd) {
-            const nextIdx = getBatterIndex(nextSong);
-            const willSwap = match.inning.outs >= 3;
-            const nextPoss = willSwap ? (match.possession === 'away' ? 'home' : 'away') : match.possession;
-            
-            const nIsAwayHit = nextPoss === 'away';
-            const nHSlots    = nIsAwayHit ? currentAwaySlots : currentHomeSlots;
-            const nPSlots    = nIsAwayHit ? currentHomeSlots : currentAwaySlots;
-            
-            const nHName     = getPlayerNameAtTeamId(nHSlots[nextIdx]);
-            const nPName     = getPlayerNameAtTeamId(nPSlots[nextIdx]);
-            
-            nextMsg = ` | Next: ${nHName} vs ${nPName}`;
+            const nextIdx       = getBatterIndex(nextSong);
+            const willSwap      = match.inning.outs >= 3;
+            const nextPoss      = willSwap ? (match.possession === 'away' ? 'home' : 'away') : match.possession;
+            const nIsAwayHit    = nextPoss === 'away';
+            const nHSlots       = nIsAwayHit ? currentAwaySlots : currentHomeSlots;
+            const nPSlots       = nIsAwayHit ? currentHomeSlots : currentAwaySlots;
+            const nHName        = getPlayerNameAtTeamId(nHSlots[nextIdx]);
+            const nPName        = getPlayerNameAtTeamId(nPSlots[nextIdx]);
+            nextMsg             = ` | Next: ${nHName} vs ${nPName}`;
             
             if (mercyWarning && nextSong < config.totalSongs) {
                 nextMsg += ` | Mercy Rule Warning`;
@@ -636,48 +617,39 @@
             }
         } 
 
-        // Hide support string if Strikeout
         let fullMsg = "";
-        if (resStr === "Strikeout") {
-             fullMsg = `${directStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
-        } else {
-             fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
-        }
+        if (resStr === "Strikeout") fullMsg = `${directStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
+        else                        fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
 
-        const awayRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i-1] : gameConfig.awaySlots[i-1]) ? 1 : 0);
-        const homeRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i-1] : gameConfig.homeSlots[i-1]) ? 1 : 0);
+        const awayRaw = [1, 2, 3, 4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i - 1] : gameConfig.awaySlots[i - 1]) ? 1 : 0);
+        const homeRaw = [1, 2, 3, 4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i - 1] : gameConfig.homeSlots[i - 1]) ? 1 : 0);
         
         match.history.push({
-            song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
-            awayArr: awayRaw, homeArr: homeRaw,
-            scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
-            result: resStr.trim(),
-            bases: [...match.inning.bases], 
-            outs: match.inning.outs
+            song        : match.songNumber,         pitchingTeam    : isAwayHitting ? 'home' : 'away',
+            awayArr     : awayRaw,                  homeArr         : homeRaw,
+            scoreAway   : match.totalScore.away,    scoreHome       : match.totalScore.home,
+            result      : resStr.trim(),
+            bases       : [...match.inning.bases],  outs            : match.inning.outs
         });
 
-        // Game Winner Logic
         if (isGameEnd) {
-             let winnerSide = "";
-             if (match.totalScore.away !== match.totalScore.home) {
-                winnerSide = match.totalScore.away > match.totalScore.home ? 'away' : 'home';
-             } else {
-                winnerSide = resolveTie(); 
-             }
-             const wName = getCleanTeamName(winnerSide);
+            let winnerSide = "";
+            if (match.totalScore.away !== match.totalScore.home)    winnerSide  = match.totalScore.away > match.totalScore.home ? 'away' : 'home';
+            else                                                    winnerSide  = resolveTie(); 
+            const                                                   wName       = getCleanTeamName(winnerSide);
 
-             let sMsg = "";
-             let tempAwayWins = config.seriesStats.awayWins;
-             let tempHomeWins = config.seriesStats.homeWins;
-             
-             if (config.seriesLength > 1) {
+            let sMsg            = "";
+            let tempAwayWins    = config.seriesStats.awayWins;
+            let tempHomeWins    = config.seriesStats.homeWins;
+            
+            if (config.seriesLength > 1) {
                 let actualWinnerSide = winnerSide;
                 if (config.isSwapped) {
-                     if (winnerSide === 'away') actualWinnerSide = 'home';
-                     else if (winnerSide === 'home') actualWinnerSide = 'away';
+                    if      (winnerSide === 'away') actualWinnerSide = 'home';
+                    else if (winnerSide === 'home') actualWinnerSide = 'away';
                 }
-                if (actualWinnerSide === 'away') tempAwayWins++;
-                else tempHomeWins++;
+                if (actualWinnerSide === 'away')    tempAwayWins++;
+                else                                tempHomeWins++;
 
                 const aName = config.teamNames.away;
                 const hName = config.teamNames.home;
@@ -688,31 +660,27 @@
                 
                 const winThreshold = Math.ceil(config.seriesLength / 2);
                 if (tempAwayWins >= winThreshold || tempHomeWins >= winThreshold) {
-                    const seriesWinner = tempAwayWins > tempHomeWins ? aName : hName;
-                    const wPts = Math.max(tempAwayWins, tempHomeWins);
-                    const lPts = Math.min(tempAwayWins, tempHomeWins);
-                    sMsg = ` | Series Winner: ${seriesWinner} ${wPts}-${lPts}`;
+                    const seriesWinner  = tempAwayWins > tempHomeWins ? aName : hName;
+                    const wPts          = Math.max(tempAwayWins, tempHomeWins);
+                    const lPts          = Math.min(tempAwayWins, tempHomeWins);
+                    sMsg                = ` | Series Winner: ${seriesWinner} ${wPts}-${lPts}`;
                 }
-             }
+            }
 
-             fullMsg += ` | Game Winner: ${wName}${sMsg}`;
-             
-             chatMessage(fullMsg);
-             finalizeGame(winnerSide);
-
+            fullMsg += ` | Game Winner: ${wName}${sMsg}`;
+            
+            chatMessage(fullMsg);
+            finalizeGame(winnerSide);
         } else {
-             chatMessage(fullMsg);
-
-             match.steal.active = false;
-             match.steal.targetSlot = null;
-
-             if (match.inning.outs >= 3) {
-                match.possession = match.possession === 'away' ? 'home' : 'away';
-                match.inning.outs = 0;
-                match.inning.bases = [false, false, false];
-             }
-
-             if (wasPendingPause) sendGameCommand("resume game");
+            chatMessage(fullMsg);
+            match.steal.active = false;
+            match.steal.targetSlot = null;
+            if (match.inning.outs >= 3) {
+                match.possession    = match.possession === 'away' ? 'home' : 'away';
+                match.inning.outs   = 0;
+                match.inning.bases  = [false, false, false];
+            }
+            if (wasPendingPause) sendGameCommand("resume game");
         }
     };
 
@@ -726,20 +694,20 @@
         let effSwapped = config.isSwapped;
 
         if (!match.isActive) {
-             const sStats = config.seriesStats;
-             const winThreshold = Math.ceil(config.seriesLength / 2);
-             const isOver = sStats.awayWins >= winThreshold || sStats.homeWins >= winThreshold || sStats.history.length >= config.seriesLength;
+            const sStats        = config.seriesStats;
+            const winThreshold  = Math.ceil(config.seriesLength / 2);
+            const isOver        = sStats.awayWins >= winThreshold || sStats.homeWins >= winThreshold || sStats.history.length >= config.seriesLength;
              
-             if (!isOver && match.history.length > 0) {
-                 effGameNum = config.gameNumber - 1;
-                 if (config.seriesLength > 1) effSwapped = !config.isSwapped;
-             }
+            if (!isOver && match.history.length > 0) {
+                effGameNum = config.gameNumber - 1;
+                if (config.seriesLength > 1) effSwapped = !config.isSwapped;
+            }
         }
         if (effGameNum < 1) effGameNum = 1;
 
         const getEffCleanName = (side) => {
             if (effSwapped) return side === 'away' ? config.teamNames.home : config.teamNames.away;
-            return config.teamNames[side];
+            else            return config.teamNames[side];
         };
 
         const awayNameClean = getEffCleanName('away');
@@ -750,17 +718,14 @@
         const mm    = String(date.getMonth      () + 1) .padStart   (2, '0');
         const dd    = String(date.getDate       ())     .padStart   (2, '0');
         
-        const safeAway      = awayNameClean.replace(/[^a-z0-9]/gi, '_');
-        const safeHome      = homeNameClean.replace(/[^a-z0-9]/gi, '_');
-        const fileName      = `${yy}${mm}${dd}-${effGameNum}-${safeAway}-${safeHome}.html`;
+        const safeAway = awayNameClean.replace(/[^a-z0-9]/gi, '_');
+        const safeHome = homeNameClean.replace(/[^a-z0-9]/gi, '_');
+        const fileName = `${yy}${mm}${dd}-${effGameNum}-${safeAway}-${safeHome}.html`;
         
         const lastEntry     = match.history[match.history.length - 1];
-        let titleScore = "";
-        
-        titleScore = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
-        
-        const titleStr = `Game ${effGameNum} (${match.history.length}): ${awayNameClean} ${titleScore} ${homeNameClean}`;
-        const subHeaders = gameConfig.posNames; 
+        let titleScore      = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
+        const titleStr      = `Game ${effGameNum} (${match.history.length}): ${awayNameClean} ${titleScore} ${homeNameClean}`;
+        const subHeaders    = gameConfig.posNames; 
 
         let html = `
         <html>
@@ -802,11 +767,9 @@
             const generateCells = (valuesArr) => {return valuesArr.map(val => {return `<td>${val === 0 ? "" : val}</td>`}).join('');};
             const leftArr   = row.awayArr;
             const rightArr  = row.homeArr;
-            
             const sAway     = row.scoreAway;
             const sHome     = row.scoreHome;
-            
-            const b = row.bases;
+            const b         = row.bases;
             const basesHtml = `<td>${b[2]?1:""}</td><td>${b[1]?1:""}</td><td>${b[0]?1:""}</td>`;
 
             html += `<tr>
@@ -838,68 +801,55 @@
         }
 
         if (match.steal.active) {
-            chatMessage("Error: A steal attempt has already been locked in for the next song.");
+            chatMessage("Error: Steal attempt has already been locked in");
             return;
         }
 
         let pObj = null;
-        if (typeof quiz !== 'undefined') pObj = Object.values(quiz.players).find(p => p.name === senderName);
-        if (!pObj && typeof lobby !== 'undefined') pObj = Object.values(lobby.players).find(p => p.name === senderName);
-        if (!pObj) pObj = playersCache.find(p => p.name === senderName);
-
+        if (typeof quiz !== 'undefined')            pObj = Object.values(quiz.players)  .find(p => p.name === senderName);
+        if (!pObj && typeof lobby !== 'undefined')  pObj = Object.values(lobby.players) .find(p => p.name === senderName);
+        if (!pObj)                                  pObj = playersCache                 .find(p => p.name === senderName);
         if (!pObj) return; 
         
-        const teamNum = pObj.teamNumber;
+        const teamNum           = pObj.teamNumber;
+        const currentAwaySlots  = config.isSwapped ?                gameConfig.homeSlots    : gameConfig.awaySlots;
+        const currentHomeSlots  = config.isSwapped ?                gameConfig.awaySlots    : gameConfig.homeSlots;
+        const hittingSlots      = (match.possession === 'away') ?   currentAwaySlots        : currentHomeSlots;
         
-        const currentAwaySlots = config.isSwapped ? gameConfig.homeSlots : gameConfig.awaySlots;
-        const currentHomeSlots = config.isSwapped ? gameConfig.awaySlots : gameConfig.homeSlots;
-        
-        const hittingSlots = (match.possession === 'away') ? currentAwaySlots : currentHomeSlots;
-        
-        if (!hittingSlots.includes(teamNum)) {
-            chatMessage("Error: Only the Hitting team can steal.");
+        if (!hittingSlots.includes(teamNum) || !config.captains.includes(teamNum)) {
+            chatMessage("Error: Only the Hitting Captain can Steal");
             return;
         }
 
-        if (!config.captains.includes(teamNum)) {
-            chatMessage("Error: Only the Captain can order a steal.");
-            return;
-        }
-
-        const hittingSide = match.possession; 
-        if (match.stealLimits[hittingSide] <= 0) {
-            chatMessage("Error: No steal attempts remaining (Max 5).");
-            return;
-        }
-
+        const hittingSide   = match.possession;
         const pitchingSlots = (match.possession === 'away') ? currentHomeSlots : currentAwaySlots;
         const targetAbsSlot = pitchingSlots[relSlot - 1];
+        const targetIdx     = targetAbsSlot - 1; 
 
-        const nextSong = match.songNumber + 1;
-        const batterIdx = getBatterIndex(nextSong);
-        const nextPitcher = pitchingSlots[batterIdx];
+        if (match.stealLimits[hittingSide] <= 0 || match.targetLimits[targetIdx] <= 0) {
+            chatMessage("Error: Out of Steal attempts");
+            return;
+        }
+
+        const nextSong      = match.songNumber + 1;
+        const batterIdx     = getBatterIndex(nextSong);
+        const nextPitcher   = pitchingSlots[batterIdx];
         
         if (targetAbsSlot === nextPitcher) {
-            chatMessage("Error: Cannot steal against the Pitcher (Batter).");
+            chatMessage("Error: Cannot Steal against the Pitcher");
             return;
         }
 
-        const targetIdx = targetAbsSlot - 1; 
-        if (match.targetLimits[targetIdx] <= 0) {
-            chatMessage("Error: Target player has reached steal immunity.");
-            return;
-        }
-
-        match.targetLimits[targetIdx]--;
-        match.stealLimits[hittingSide]--;
+        match.targetLimits  [targetIdx]     --;
+        match.stealLimits   [hittingSide]   --;
 
         match.steal.active      = true;
         match.steal.targetSlot  = targetAbsSlot;
         match.steal.team        = hittingSide;
 
-        const targetName = getPlayerNameAtTeamId(targetAbsSlot);
-        const limitsStr  = getStealLimitsString();
-        chatMessage(`Steal attempt on ${targetName} next Song | Steal Counter: ${limitsStr}`);
+        const targetName    = getPlayerNameAtTeamId(targetAbsSlot);
+        const limitsStr     = getStealLimitsString();
+        chatMessage(`Steal Attempt: ${targetName} | Steal Counter: ${limitsStr}`);
     };
 
     const setup = () => {
@@ -995,20 +945,13 @@
             });
         }).bindListener();
 
-        new Listener("answer results", (payload) => {
-            if (match.isActive) setTimeout(() => processRound(payload), config.delay);
-        }).bindListener();
-
-        new Listener("play next song", () => {
-            if (match.isActive) {
-                if (match.pendingPause) sendGameCommand("pause game");
-            }
-        }).bindListener();
+        new Listener("answer results", (payload)    => {if (match.isActive)                         setTimeout(() => processRound(payload), config.delay)}) .bindListener();
+        new Listener("play next song", ()           => {if (match.isActive && match.pendingPause)   sendGameCommand("pause game")})                         .bindListener();
     };
 
     function init() {
         if (typeof quiz !== 'undefined' && typeof Listener !== 'undefined') setup();
-        else setTimeout(init, config.delay);
+        else                                                                setTimeout(init, config.delay);
     }
 
     init();
