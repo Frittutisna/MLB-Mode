@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-alpha.6
+// @version      0-alpha.7
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -598,14 +598,12 @@
 
         let resStr = "";
         if (rbi > 0) {
-            // New syntax: 2-RBI etc.
-            // Home Run special case
             if (resultName.includes("Home Run")) {
                 if (rbi === 4) resStr = "Grand Slam";
                 else if (rbi > 1) resStr = `${rbi}-Run Home Run`;
-                else resStr = "Home Run"; // 1-Run
+                else resStr = "Home Run"; 
             } else {
-                resStr = `${rbi}-RBI ${resultName}`;
+                resStr = (rbi === 1 ? "RBI " : `${rbi}-RBI `) + resultName;
             }
         } else {
             resStr = resultName;
@@ -638,23 +636,27 @@
             }
         } 
 
-        let fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
+        // Hide support string if Strikeout
+        let fullMsg = "";
+        if (resStr === "Strikeout") {
+             fullMsg = `${directStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
+        } else {
+             fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
+        }
 
-        // History snapshot
         const awayRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i-1] : gameConfig.awaySlots[i-1]) ? 1 : 0);
         const homeRaw = [1,2,3,4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i-1] : gameConfig.homeSlots[i-1]) ? 1 : 0);
         
-        // Save history before potential swap resets
         match.history.push({
             song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
             awayArr: awayRaw, homeArr: homeRaw,
             scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
             result: resStr.trim(),
-            bases: [...match.inning.bases], // snapshot [1st, 2nd, 3rd]
+            bases: [...match.inning.bases], 
             outs: match.inning.outs
         });
 
-        // Game Winner Logic (Combined Line)
+        // Game Winner Logic
         if (isGameEnd) {
              let winnerSide = "";
              if (match.totalScore.away !== match.totalScore.home) {
@@ -755,9 +757,6 @@
         const lastEntry     = match.history[match.history.length - 1];
         let titleScore = "";
         
-        // FIXED: Do not swap score numbers, only names. 
-        // match.scores tracks Visual Away / Visual Home.
-        // so row.scoreAway is always the score of 'awayNameClean'.
         titleScore = `${lastEntry.scoreAway}-${lastEntry.scoreHome}`;
         
         const titleStr = `Game ${effGameNum} (${match.history.length}): ${awayNameClean} ${titleScore} ${homeNameClean}`;
@@ -791,7 +790,7 @@
                     <tr>
                         ${subHeaders.map(h => `<th>${h}</th>`).join('')}
                         ${subHeaders.map(h => `<th>${h}</th>`).join('')}
-                        <th>3</th><th>2</th><th>1</th>
+                        <th>3rd</th><th>2nd</th><th>1st</th>
                         <th>${awayNameClean}</th>
                         <th>${homeNameClean}</th>
                     </tr>
@@ -801,16 +800,12 @@
 
         match.history.forEach(row => {
             const generateCells = (valuesArr) => {return valuesArr.map(val => {return `<td>${val === 0 ? "" : val}</td>`}).join('');};
-            // Left/Right arrays must swap if team names swapped?
-            // match.history stores 'awayArr' (Visual Away) and 'homeArr' (Visual Home).
-            // So if effSwapped, visual Away IS correct for Left. No swap needed for arrays either.
             const leftArr   = row.awayArr;
             const rightArr  = row.homeArr;
             
             const sAway     = row.scoreAway;
             const sHome     = row.scoreHome;
             
-            // Bases: stored as [1st, 2nd, 3rd] -> Display [3, 2, 1]
             const b = row.bases;
             const basesHtml = `<td>${b[2]?1:""}</td><td>${b[1]?1:""}</td><td>${b[0]?1:""}</td>`;
 
