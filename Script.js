@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-alpha.4
+// @version      0.alpha.5
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -375,7 +375,6 @@
         }
 
         // Return to lobby ONLY if it ended early (Mercy Rule)
-        // match.songNumber has already been incremented in processRound, so check against totalSongs
         if (match.songNumber < config.totalSongs) {
             sendGameCommand("pause game");
             setTimeout(() => sendGameCommand("return to lobby"), config.delay);
@@ -451,9 +450,10 @@
         const hittingCorrect    = checkSlot(hittingSlot);
         const pitchingCorrect   = checkSlot(pitchingSlot);
         const isCaptain         = config.captains.includes(hittingSlot);
+        const isPitchingCaptain = config.captains.includes(pitchingSlot);
         
         const hVal = hittingCorrect ? (isCaptain ? 2 : 1) : 0;
-        const pVal = pitchingCorrect ? 1 : 0;
+        const pVal = pitchingCorrect ? (isPitchingCaptain ? 2 : 1) : 0;
         const diff = hVal - pVal;
 
         // --- Steal Resolution ---
@@ -623,13 +623,12 @@
             
             nextMsg = ` | Next: ${nHName} vs ${nPName}`;
             
-            if (mercyWarning) {
+            // Warning only if NOT about to end naturally
+            if (mercyWarning && nextSong < config.totalSongs) {
                 nextMsg += ` | Mercy Rule Warning`;
                 match.pendingPause = true;
             }
-        } else if (mercyTriggered) {
-             nextMsg += ` | Mercy Rule Triggered`;
-        }
+        } 
 
         let fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
 
@@ -682,7 +681,7 @@
                 song: match.songNumber, pitchingTeam: isAwayHitting ? 'home' : 'away',
                 awayArr: awayRaw, homeArr: homeRaw,
                 scoreAway: match.totalScore.away, scoreHome: match.totalScore.home,
-                result: resStr.trim() // Save text result for HTML
+                result: resStr.trim()
              });
 
              finalizeGame(winnerSide);
@@ -722,8 +721,6 @@
         let effSwapped = config.isSwapped;
 
         if (!match.isActive) {
-             // If series not finished, gameNumber has likely been incremented by finalizeGame
-             // Check series stats to see if series is over
              const sStats = config.seriesStats;
              const winThreshold = Math.ceil(config.seriesLength / 2);
              const isOver = sStats.awayWins >= winThreshold || sStats.homeWins >= winThreshold || sStats.history.length >= config.seriesLength;
@@ -826,7 +823,6 @@
             return;
         }
 
-        // LOCK CHECK
         if (match.steal.active) {
             chatMessage("Error: A steal attempt has already been locked in for the next song.");
             return;
@@ -840,12 +836,18 @@
         if (!pObj) return; 
         
         const teamNum = pObj.teamNumber;
-        const isAway = gameConfig.awaySlots.includes(teamNum) || (config.isSwapped && gameConfig.homeSlots.includes(teamNum));
-        const isHome = gameConfig.homeSlots.includes(teamNum) || (config.isSwapped && gameConfig.awaySlots.includes(teamNum));
         
-        const hittingSide = match.possession; 
+        // --- FIXED PERMISSION LOGIC ---
+        // Determine who is currently hitting based on possession
+        // If swapped, logic is consistent, but slots shift meaning.
+        // Hitting Slots: The slots corresponding to match.possession.
         
-        if ((hittingSide === 'away' && !isAway) || (hittingSide === 'home' && !isHome)) {
+        const currentAwaySlots = config.isSwapped ? gameConfig.homeSlots : gameConfig.awaySlots;
+        const currentHomeSlots = config.isSwapped ? gameConfig.awaySlots : gameConfig.homeSlots;
+        
+        const hittingSlots = (match.possession === 'away') ? currentAwaySlots : currentHomeSlots;
+        
+        if (!hittingSlots.includes(teamNum)) {
             chatMessage("Error: Only the Hitting team can steal.");
             return;
         }
@@ -855,14 +857,13 @@
             return;
         }
 
+        const hittingSide = match.possession; // Used for limits
         if (match.stealLimits[hittingSide] <= 0) {
             chatMessage("Error: No steal attempts remaining (Max 5).");
             return;
         }
 
-        const currentAwaySlots = config.isSwapped ? gameConfig.homeSlots : gameConfig.awaySlots;
-        const currentHomeSlots = config.isSwapped ? gameConfig.awaySlots : gameConfig.homeSlots;
-        const pitchingSlots = hittingSide === 'away' ? currentHomeSlots : currentAwaySlots;
+        const pitchingSlots = (match.possession === 'away') ? currentHomeSlots : currentAwaySlots;
         const targetAbsSlot = pitchingSlots[relSlot - 1];
 
         const nextSong = match.songNumber + 1;
