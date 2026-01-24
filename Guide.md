@@ -1,4 +1,4 @@
-# MLB Mode v0-alpha.7
+# MLB Mode v0-beta.0.0
 
 ## Table of Contents
 - [TLDR: What Do I Do?](#tldr-what-is-this-and-what-do-i-do)
@@ -7,7 +7,7 @@
 - [Comparison: What's The Difference?](#comparison-whats-the-difference)
 - [Lineup: Away and Home, Captains](#lineup-away-and-home-captains)
 - [Score: Check the (T)DIFF](#score-check-the-tdiff)
-- [Ending: Time for Tiebreakers?](#ending-time-for-tiebreakers)
+- [Ending: Mercy Rule, Tiebreakers](#ending-mercy-rule-tiebreakers)
 - [Format: Best-of-7, Round Robin, Knockouts](#format-best-of-7-round-robin-knockouts)
 - [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do)
 
@@ -40,7 +40,7 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
     <tr>
         <td style="text-align:center">Regulation</td>
         <td style="text-align:center">2 hours</td>
-        <td style="text-align:center">30</td>
+        <td style="text-align:center">16-30</td>
         <td style="text-align:center">20</td>
         <td style="text-align:center">0-100</td>
         <td style="text-align:center">Random</td>
@@ -76,8 +76,8 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
         </tr>
         <tr>
             <td style="text-align:center">Song Count</td>
-            <td style="text-align:center">30</td>
-            <td style="text-align:center">16-40</td>
+            <td style="text-align:center">16-30</td>
+            <td style="text-align:center">12-40</td>
             <td style="text-align:center">11-20</td>
             <td style="text-align:center">0-5</td>
         </tr>
@@ -90,14 +90,12 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
         <tr>
             <td style="text-align:center">Song Difficulty</td>
             <td style="text-align:center">0-100</td>
-            <td style="text-align:center" colspan="2">0-40</td>
-            <td style="text-align:center">0-100</td>
+            <td style="text-align:center" colspan="3">0-40</td>
         </tr>
         <tr>
             <td style="text-align:center">Song Mix</td>
             <td style="text-align:center">Random</td>
-            <td style="text-align:center" colspan="2" >Watched with <strong>Random</strong> Rig Distribution</td>
-            <td style="text-align:center">Random</td>
+            <td style="text-align:center" colspan="3" >Watched with Random Rig Distribution</td>
         </tr>
         <tr>
             <td style="text-align:center">DIFF</td>
@@ -113,7 +111,7 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
         <tr><td style="text-align:center">Base Stealing</td></tr>
         <tr>
             <td style="text-align:center">Hot Streak</td>
-            <td style="text-align:center" rowspan="4">No</td>
+            <td style="text-align:center" rowspan="6">No</td>
             <td style="text-align:center" rowspan="4">Yes</td>
         </tr>
         <tr><td style="text-align:center">Fast Break</td></tr>
@@ -121,17 +119,19 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
         <tr><td style="text-align:center">Buzzer Beater</td></tr>
         <tr>
             <td style="text-align:center">OP/DP Split</td>
-            <td style="text-align:center" colspan="2" rowspan="5">No</td>
+            <td style="text-align:center" rowspan="5">No</td>
             <td style="text-align:center" colspan="2" rowspan="2">Yes</td>
         </tr>
         <tr><td style="text-align:center">Rouge</td></tr>
         <tr>
             <td style="text-align:center">Mercy Rule</td>
             <td style="text-align:center">Yes</td>
+            <td style="text-align:center">Yes</td>
             <td style="text-align:center">No</td>
         </tr>
         <tr>
             <td style="text-align:center">Sudden Death</td>
+            <td style="text-align:center" rowspan="2">No</td>
             <td style="text-align:center" rowspan="2">No</td>
             <td style="text-align:center" rowspan="2">Yes</td>
         </tr>
@@ -145,14 +145,10 @@ The team listed first (above) on Challonge is the **Away** team for each series.
 ## Score: Check the (T)DIFF
 <details>
     <summary><b>Click to know more about Scoring</b></summary>
-    <p>The <b>Away</b> team bats first. 
-    Possession (at-bat) swaps <b>only</b> after the 3rd Out for the Hitting team.
-    To determine which player is at-bat, divide the song number by 4. 
-    The remainder (1-4, change 0 to 4) 
-    indicates the player number (P#) currently hitting.</p>
+    <p>The <b>Away</b> team bats (is the Hitting team) first. Hitting and Pitching teams swap <b>only</b> after the 3rd Out for the Hitting team. To determine which player is batting/pitching, divide the Song number by 4. The remainder (1-4, change 0 to 4) indicates the player number currently hitting/pitching.</p>
     <ol>
-        <li><b>DIFF:</b> Hitting P# score - Pitching P# score.</li>
-        <li><b>ODIFF:</b> If DIFF ≥ 0, calculate Hitting PN# score - Pitching PN# score for non-at-bat players.</li>
+        <li><b>DIFF:</b> Hitting Batter - Pitching Pitcher.</li>
+        <li><b>ODIFF:</b> If DIFF ≥ 0, calculate Non-Batters - Non-Pitchers.</li>
         <li><b>TDIFF:</b> DIFF + max(0, ODIFF).</li>
     </ol>
     </p>
@@ -164,14 +160,18 @@ The team listed first (above) on Challonge is the **Away** team for each series.
         <th style="text-align:center"><strong>DIFF</strong></th>
         <th style="text-align:center"><strong>TDIFF</strong></th>
         <th style="text-align:center"><strong>Outcome</strong></th>
-        <th style="text-align:center"><strong>Possession</strong></th>
+        <th style="text-align:center"><strong>Hitting/Pitching</strong></th>
     </tr>
     <tr>
         <td style="text-align:center"><code>Strikeout</code></td>
         <td style="text-align:center">< 0</td>
         <td style="text-align:center">N/A</td>
-        <td style="text-align:center">Add 1 Out</td>
-        <td style="text-align:center">Swap on 3rd Out</td>
+        <td style="text-align:center" rowspan="2">Add 1 Out</td>
+        <td style="text-align:center" rowspan="2">Swap on 3rd Out</td>
+    </tr>
+    <tr>
+        <td style="text-align:center"><code>Flyout</code></td>
+        <td style="text-align:center" colspan="2">0</td>
     </tr>
     <tr>
         <td style="text-align:center"><code>Single</code></td>
@@ -193,12 +193,12 @@ The team listed first (above) on Challonge is the **Away** team for each series.
     <tr>
         <td style="text-align:center"><code>Home Run</code></td>
         <td style="text-align:center">≥ 4</td>
-        <td style="text-align:center">Move forward 4 bases and Score ≥1 run</td>
+        <td style="text-align:center">Move forward 4 bases and score Run(s)</td>
     </tr>
     <tr>
         <td style="text-align:center"><code>Steal</code></td>
         <td style="text-align:center">> 0</td>
-        <td style="text-align:center">Move forward 1 more base or Add 1 Out</td>
+        <td style="text-align:center">Move forward 1 more base or add 1 Out</td>
         <td style="text-align:center">Swap on 3rd Out</td>
     </tr>
 </table>
@@ -206,27 +206,16 @@ The team listed first (above) on Challonge is the **Away** team for each series.
 ### Steal: Isn't That A Bad Thing?
 <details>
     <summary><b>Click to know more about Stealing</b></summary>
-    <p>Before the next Song, the Hitting Captain 
-    can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code>. 
-    This can only be used against non-at-bat players from the Pitching team 
-    (e.g., on Song 14, Slots 2 and 6 cannot be targeted). 
-    Captains can be targeted twice, but non-Captains can only be targeted once. 
-    Two requirements have to be fulfilled for a Steal attempt to be <b>successful</b>: 
-    the next song must be a <code>Base Hit</code> (not a <code>Strikeout</code>), 
-    and the targeted player must <b>miss</b> the next song. 
-    If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. 
-    If either fails, the Hitting team is <b>Caught Stealing</b> 
-    and the song is automatically ruled as an Out.</p>
+    <p>The Hitting Captain can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code> against Non-Pitchers (e.g., on Song 14, Slots 2 and/or 6 cannot be targeted). Captains can be targeted twice, but non-Captains can only be targeted once. Two requirements have to be fulfilled for a Steal attempt to be <b>successful</b>: the next song must be a <code>Hit</code> (not a <code>Strikeout</code> or a <code>Flyout</code>), and the targeted player must <b>miss</b> the song. If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. If either fails, the Hitting team is <b>Caught Stealing</b> and the song is automatically ruled an Out.</p>
 </details>
 
-## Ending: Time For Tiebreakers?
-If Regulation doesn't break the tie, 
-consult the following tiebreakers:
+## Ending: Mercy Rule, Tiebreakers
+Mercy Rule triggers if the trailing team can't catch with the songs left. If Regulation doesn't break the tie, consult the following tiebreakers:
 1. Weighted Total (counting Captains twice)
 2. Captains (Slots 1 vs 5)
 3. T2s (Slots 2 vs 6)
 4. T3s (Slots 3 vs 7)
-5. Possession (the **Pitching** Team for Song 30)
+5. Defending Team for Song 30
 
 ## Format: Best-Of-7, Round Robin, Knockouts
 The script will automatically swap Away and Home teams between consecutive games.
