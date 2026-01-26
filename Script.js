@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.0
+// @version      0-beta.0.1
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -149,6 +149,22 @@
             if (p) return p.name;
         }
         return `Player ${teamId}`;
+    };
+
+    const getSelfSlot = () => {
+        if (playersCache.length > 0) {
+            const p = playersCache                      .find(p => p.name === selfName);
+            if (p) return p.teamNumber;
+        }
+        if (typeof quiz     !== 'undefined' && quiz     .inQuiz) {
+            const p = Object.values(quiz    .players)   .find(p => p.name === selfName);
+            if (p) return p.teamNumber;
+        }
+        if (typeof lobby    !== 'undefined' && lobby    .inLobby) {
+            const p = Object.values(lobby   .players)   .find(p => p.name === selfName);
+            if (p) return getTeamNumber(p);
+        }
+        return 0;
     };
 
     const updateLobbyName = (awayClean, homeClean) => {
@@ -744,7 +760,7 @@
                     <tr><th colspan="17" style="font-size: 1.5em; font-weight: bold;">${titleStr}</th></tr>
                     <tr>
                         <th rowspan="2">Song</th>
-                        <th rowspan="2">Pitching</th>
+                        <th rowspan="2">Hitting</th>
                         <th colspan="4">${awayNameClean}</th>
                         <th colspan="4">${homeNameClean}</th>
                         <th colspan="3">Bases</th>
@@ -763,7 +779,9 @@
                 <tbody>
         `;
 
-        match.history.forEach(row => {
+        let skipHitting = 0;
+
+        match.history.forEach((row, index) => {
             const generateCells = (valuesArr) => {return valuesArr.map(val => {return `<td>${val === 0 ? "" : val}</td>`}).join('');};
             const leftArr   = row.awayArr;
             const rightArr  = row.homeArr;
@@ -772,9 +790,25 @@
             const b         = row.bases;
             const basesHtml = `<td>${b[2]?1:""}</td><td>${b[1]?1:""}</td><td>${b[0]?1:""}</td>`;
 
+            let hittingHtml = "";
+            if (skipHitting > 0) {
+                skipHitting--;
+                hittingHtml = "";
+            } else {
+                let span = 1;
+                for (let j = index + 1; j < match.history.length; j++) {
+                    if (match.history[j].pitchingTeam === row.pitchingTeam) span++;
+                    else break;
+                }
+                if (span > 1) {
+                    hittingHtml = `<td rowspan="${span}">${getCleanTeamName(row.pitchingTeam)}</td>`;
+                    skipHitting = span - 1;
+                } else hittingHtml = `<td>${getCleanTeamName(row.pitchingTeam)}</td>`;
+            }
+
             html += `<tr>
                     <td>${row.song}</td>
-                    <td>${getCleanTeamName(row.pitchingTeam)}</td>
+                    ${hittingHtml}
                     ${generateCells(leftArr)}
                     ${generateCells(rightArr)}
                     ${basesHtml}
@@ -872,16 +906,19 @@
                     
                     if (["flowchart", "guide", "help", "whatis"].includes(cmd)) {
                         setTimeout(() => {
-                            if (cmd === "whatis") {
-                                if (!arg || arg === "help") chatMessage("Available terms: " + Object.keys(TERMS).sort().join(", "));
-                                else {
-                                    if (TERMS[arg])         chatMessage(`${arg}: ${TERMS[arg]}`);
-                                    else                    chatMessage(`Unknown term '${arg}'.`);
+                            const mySlot = getSelfSlot();
+                            if (config.hostId !== 0 && config.hostId === mySlot) {
+                                if (cmd === "whatis") {
+                                    if (!arg || arg === "help") chatMessage("Available terms: " + Object.keys(TERMS).sort().join(", "));
+                                    else {
+                                        if (TERMS[arg])         chatMessage(`${arg}: ${TERMS[arg]}`);
+                                        else                    chatMessage(`Unknown term '${arg}'.`);
+                                    }
                                 }
+                                else if (cmd === "help")        chatMessage("Commands: " + Object.keys(COMMAND_DESCRIPTIONS).join(", "));
+                                else if (cmd === "flowchart")   chatMessage(`Flowchart: ${config.links.flowchart}`);
+                                else if (cmd === "guide")       chatMessage(`Guide: ${config.links.guide}`);
                             }
-                            else if (cmd === "help")        chatMessage("Commands: " + Object.keys(COMMAND_DESCRIPTIONS).join(", "));
-                            else if (cmd === "flowchart")   chatMessage(`Flowchart: ${config.links.flowchart}`);
-                            else if (cmd === "guide")       chatMessage(`Guide: ${config.links.guide}`);
                         }, config.delay);
                         return;
                     }

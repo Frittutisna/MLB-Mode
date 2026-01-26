@@ -1,4 +1,4 @@
-# MLB Mode v0-beta.0.0
+# MLB Mode v0-beta.0.1
 
 ## Table of Contents
 - [TLDR: What Do I Do?](#tldr-what-is-this-and-what-do-i-do)
