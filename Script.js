@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.1
+// @version      0-beta.0.2
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -15,7 +15,7 @@
     let config = {
         delay               : 500,
         gameNumber          : 1,
-        hostId              : 0,
+        hostId              : -1,
         teamNames           : {away: "Away", home: "Home"},
         captains            : [1, 5], 
         totalSongs          : 30,     
@@ -104,7 +104,7 @@
         "resetGame"         : "Wipe game progress and stop tracker",
         "resetSeries"       : "Wipe game/series progress and reset to Game 1",
         "setGame"           : "Set the current game number (/mlb setGame [1-7], defaults to 1)",
-        "setHost"           : "Set the script host (/mlb setHost [1-8], defaults to 0)",
+        "setHost"           : "Set the script host (/mlb setHost [0-8], defaults to -1 and can't start unless changed)",
         "setSeries"         : "Set the series length (/mlb setSeries [1/2/7], defaults to 7)",
         "setTeams"          : "Set team names (/mlb setTeams [Away] [Home])",
         "setTest"           : "Enable/disable loose lobby validation (/mlb setTest [true/false])",
@@ -310,7 +310,7 @@
         match.isActive      = false;
         resetMatchData();
         config.gameNumber   = 1;
-        config.hostId       = 0;
+        config.hostId       = -1;
         config.teamNames    = {away: "Away", home: "Home"};
         config.captains     = [1, 5];
         config.isSwapped    = false;
@@ -406,7 +406,7 @@
     };
 
     const validateLobby = () => {
-        if (config.hostId === 0)                            return {valid: false, msg: "Error: Host not set, use /mlb setHost [1-8]"};
+        if (config.hostId === -1)                           return {valid: false, msg: "Error: Host not set, use /mlb setHost [0-8]"};
         if (typeof lobby === 'undefined' || !lobby.inLobby) return {valid: false, msg: "Error: Not in lobby"};
         const players   = Object.values(lobby.players);
         const notReady  = players.filter(p => !p.ready);
@@ -425,7 +425,7 @@
     };
 
     const printHowTo = () => {
-        systemMessage("1. /mlb setHost [1-8]: Set the slot of the lobby host, defaults to 0 and cannot start unless changed");
+        systemMessage("1. /mlb setHost [0-8]: Set the slot of the lobby host, defaults to -1 and cannot start unless changed");
         systemMessage("2. /mlb setTeams [Away] [Home]: Set the team names, defaults to Away and Home");
         systemMessage("3. /mlb setSeries [1/2/7]: Set the series length, defaults to 7");
         systemMessage("4. /mlb setGame [1-7]: Set the game number, defaults to 1");
@@ -899,15 +899,15 @@
         new Listener("game chat update", (payload) => {
             payload.messages.forEach(msg => {
                 if (msg.message.startsWith("/mlb")) {
-                    const parts             = msg.message.split(" ");
-                    const cmd               = parts[1] ? parts[1].toLowerCase() : "help";
-                    const arg               = parts[2] ? parts[2].toLowerCase() : "";
-                    const isHost            = (msg.sender === selfName);
+                    const parts     = msg.message.split(" ");
+                    const cmd       = parts[1] ? parts[1].toLowerCase() : "help";
+                    const arg       = parts.slice(2).join(" ").toLowerCase();
+                    const isHost    = (msg.sender === selfName);
                     
                     if (["flowchart", "guide", "help", "whatis"].includes(cmd)) {
                         setTimeout(() => {
                             const mySlot = getSelfSlot();
-                            if (config.hostId !== 0 && config.hostId === mySlot) {
+                            if (config.hostId !== -1 && config.hostId === mySlot) {
                                 if (cmd === "whatis") {
                                     if (!arg || arg === "help") chatMessage("Available terms: " + Object.keys(TERMS).sort().join(", "));
                                     else {
@@ -947,11 +947,11 @@
                             }
                             else if (cmd === "sethost") {
                                 const num = parseInt(parts[2]);
-                                if (num >= 1 && num <= 8) { 
+                                if (!isNaN(num) && num >= 0 && num <= 8) { 
                                     config.hostId   = num; 
-                                    const hName     = getPlayerNameAtTeamId(num);
+                                    const hName     = num === 0 ? "Spectator" : getPlayerNameAtTeamId(num);
                                     systemMessage(`Host: ${hName}`); 
-                                } else systemMessage("Error: Use /mlb setHost [1-8]");
+                                } else systemMessage("Error: Use /mlb setHost [0-8]");
                             }
                             else if (cmd === "setseries") {
                                 const num = parseInt(parts[2]);
