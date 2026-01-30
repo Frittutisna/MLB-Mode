@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.3.2
+// @version      0-beta.0.3.3
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -17,7 +17,8 @@
         gameNumber          : 1,
         hostId              : -1,
         teamNames           : {away: "Away", home: "Home"},
-        captains            : [1, 5], 
+        captains            : [1, 5],
+        stealers            : [1, 5], 
         totalSongs          : 30,     
         isSwapped           : false,
         isTest              : false,
@@ -67,14 +68,14 @@
     const TERMS = {
         "away"              : "The team before the @ sign. Bats first",
         "home"              : "The team after the @ sign. Bats second",
-        "batter"            : "The player currently batting. Cycles every 4 Songs. Needs to at least match the Pitcher to potentially score a Hit (and by extension Run(s))",
-        "pitcher"           : "The player currently pitching. Cycles every 4 Songs. Needs to beat the Batter to deny a Hit and score a Strikeout",
+        "batter"            : "The player currently batting. Cycles every 4 songs. Needs to at least match the Pitcher to potentially score a Hit (and by extension Run(s))",
+        "pitcher"           : "The player currently pitching. Cycles every 4 songs. Needs to beat the Batter to deny a Hit and score a Strikeout",
         "hit"               : "Any outcome that doesn't add an Out; can score Run(s)",
         "non-batters"       : "Teammates of the Batter. Can improve (but not harm) a Hit",
         "non-pitchers"      : "Teammates of the Pitcher. Can prevent Non-Batters from improving a Hit",
         "hitting"           : "The team currently attacking. Swaps after 3 Outs",
         "pitching"          : "The team currently defending. Swaps after 3 Outs",
-        "captain"           : "Slots 1 and 5. Can use the Steal command against Non-Pitchers. Correct guesses count double for (O)DIFF",
+        "captain"           : "Slots 1 and 5. Correct guesses count double for (O)DIFF",
         "diff"              : "Batter - Pitcher, 1v1. Strikeout if < 0",
         "odiff"             : "Non-Batters - Non-Pitchers, 3v3. Only counts if DIFF ≥ 0",
         "tdiff"             : "DIFF + max(0, ODIFF). Determines hit type: Home Run > Triple > Double > Single > Flyout",
@@ -89,13 +90,14 @@
         "run"               : "See RBI. Whoever has more Runs at the end of the Game wins",
         "tiebreaker"        : "Weighted Total > Captains > T2s > T3s > Pitching",
         "weighted total"    : "Total team correct, counting Captains twice",
-        "steal"             : "Hitting Captain command to target Non-Pitchers (Captains can be targeted twice, others once). If successful (DIFF ≥ 0 and target missed), add +1 Base to hit. If failed, Song is ruled an Out",
+        "steal"             : "Designated Stealer command to target Non-Pitchers (Captains can be targeted twice, others once). If successful (team Hit AND target missed), +1 Base to hit. Otherwise, song is ruled an Out",
         "caught stealing"   : "Failed Steal attempt",
-        "retired"           : "3rd Out. Swaps Hitting and Pitching teams for the next Song",
+        "retired"           : "3rd Out. Swaps Hitting and Pitching teams for the next song",
         "mercy rule"        : "Ends the Game early if the trailing team cannot catch up",
     };
 
     const COMMAND_DESCRIPTIONS = {
+        "counter"           : "Show the current steal counter",
         "end"               : "End the game tracker",
         "export"            : "Download the HTML scoresheet",
         "flowchart"         : "Show link to the flowchart",
@@ -108,6 +110,7 @@
         "setGame"           : "Set the current game number (/mlb setGame [1-5], defaults to 1)",
         "setHost"           : "Set the script host (/mlb setHost [0-8], defaults to -1 and can't start unless changed)",
         "setSeries"         : "Set the series length (/mlb setSeries [1/2/3/5], defaults to 5)",
+        "setStealers"       : "Set the designated stealers (/mlb setStealers [1-4] [5-8], defaults to 1 and 5)",
         "setTeams"          : "Set team names (/mlb setTeams [Away] [Home])",
         "setTest"           : "Enable/disable loose lobby validation (/mlb setTest [true/false])",
         "start"             : "Start the game tracker",
@@ -315,6 +318,7 @@
         config.hostId       = -1;
         config.teamNames    = {away: "Away", home: "Home"};
         config.captains     = [1, 5];
+        config.stealers     = [1, 5];
         config.isSwapped    = false;
         config.isTest       = false;
         config.seriesLength = 7;
@@ -421,17 +425,22 @@
         const check = validateLobby();
         if (!check.valid) {systemMessage(check.msg); return}
         resetMatchData();
-        match.isActive      = true;
-        match.gameNumber    = config.gameNumber;
-        chatMessage(`Game ${config.gameNumber}: ${getCleanTeamName('away')} @ ${getCleanTeamName('home')} is close to the opening pitch!`);
+        match.isActive          = true;
+        match.gameNumber        = config.gameNumber;
+        const currentAwaySlots  = config.isSwapped ? gameConfig.homeSlots : gameConfig.awaySlots;
+        const currentHomeSlots  = config.isSwapped ? gameConfig.awaySlots : gameConfig.homeSlots;
+        const bName             = getPlayerNameAtTeamId(currentAwaySlots[0]); 
+        const pName             = getPlayerNameAtTeamId(currentHomeSlots[0]);
+        chatMessage(`Game ${config.gameNumber}: ${getCleanTeamName('away')} @ ${getCleanTeamName('home')} is close to the opening pitch! | Next: Hitter ${bName} vs Pitcher ${pName}`);
     };
 
     const printHowTo = () => {
         systemMessage("1. /mlb setHost [0-8]: Set the slot of the lobby host, defaults to -1 and cannot start unless changed");
         systemMessage("2. /mlb setTeams [Away] [Home]: Set the team names, defaults to Away and Home");
-        systemMessage("3. /mlb setSeries [1/2/3/5]: Set the series length, defaults to 5");
-        systemMessage("4. /mlb setGame [1-5]: Set the game number, defaults to 1");
-        systemMessage("5. /mlb start: Start the game");
+        systemMessage("3. /mlb setStealers [1-4] [5-8]: Set the designated stealers, defaults to 1 and 5");
+        systemMessage("4. /mlb setSeries [1/2/3/5]: Set the series length, defaults to 5");
+        systemMessage("5. /mlb setGame [1-5]: Set the game number, defaults to 1");
+        systemMessage("6. /mlb start: Start the game");
     };
 
     const getBatterIndex = (songNum) => {return (songNum - 1) % 4};
@@ -627,7 +636,7 @@
             const nPSlots       = nIsAwayHit ? currentHomeSlots : currentAwaySlots;
             const nHName        = getPlayerNameAtTeamId(nHSlots[nextIdx]);
             const nPName        = getPlayerNameAtTeamId(nPSlots[nextIdx]);
-            nextMsg             = ` | Next: ${nHName} vs ${nPName}`;
+            nextMsg             = ` | Next: Hitter ${nHName} vs Pitcher ${nPName}`;
             
             if (mercyWarning && nextSong < config.totalSongs) {
                 nextMsg += ` | Mercy Rule Warning`;
@@ -849,14 +858,16 @@
         if (!pObj && typeof lobby !== 'undefined')  pObj = Object.values(lobby.players) .find(p => p.name === senderName);
         if (!pObj)                                  pObj = playersCache                 .find(p => p.name === senderName);
         if (!pObj) return; 
-        
+
         const teamNum           = pObj.teamNumber;
         const currentAwaySlots  = config.isSwapped ?                gameConfig.homeSlots    : gameConfig.awaySlots;
         const currentHomeSlots  = config.isSwapped ?                gameConfig.awaySlots    : gameConfig.homeSlots;
         const hittingSlots      = (match.possession === 'away') ?   currentAwaySlots        : currentHomeSlots;
-        
-        if (!hittingSlots.includes(teamNum) || !config.captains.includes(teamNum)) {
-            chatMessage(`Error: Only the Hitting Captain can Steal | Steal Counter: ${limitsStr}`);
+
+        if (!hittingSlots.includes(teamNum) || !config.stealers.includes(teamNum)) {
+            const currentStealerSlot = config.stealers.find(s => hittingSlots.includes(s));
+            const currentStealerName = getPlayerNameAtTeamId(currentStealerSlot);
+            chatMessage(`Error: Only ${currentStealerName} can steal right now | Steal Counter: ${limitsStr}`);
             return;
         }
 
@@ -938,6 +949,11 @@
                         return;
                     }
 
+                    if (cmd === "counter" && match.isActive) {
+                        chatMessage(`Steal Counter: ${getStealLimitsString()}`);
+                        return;
+                    }
+
                     if (isHost) {
                         setTimeout(() => {
                             if      (cmd === "start")       startGame();
@@ -949,6 +965,16 @@
                                     config.teamNames.home = toTitleCase(parts[3]);
                                     updateLobbyName(config.teamNames.away, config.teamNames.home);
                                 } else systemMessage("Error: Use /mlb setTeams [Away] [Home]");
+                            }
+                            else if (cmd === "setstealers") {
+                                const awayStealerSlot = parseInt(parts[2]);
+                                const homeStealerSlot = parseInt(parts[3]);
+                                if ([1, 2, 3, 4].includes(awayStealerSlot) && [5, 6, 7, 8].includes(homeStealerSlot)) {
+                                    config.stealers         = [awayStealerSlot, homeStealerSlot];
+                                    const awayStealerName   = getPlayerNameAtTeamId(awayStealerSlot);
+                                    const homeStealerName   = getPlayerNameAtTeamId(homeStealerSlot);
+                                    systemMessage(`Stealers: ${awayStealerName}, ${homeStealerName}`);
+                                } else systemMessage("Error: Use /mlb setStealers [1-4] [5-8]");
                             }
                             else if (cmd === "setgame") {
                                 const num = parseInt(parts[2]);
