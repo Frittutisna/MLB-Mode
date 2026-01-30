@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.3.3
+// @version      0-beta.0.3.4
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -839,7 +839,7 @@
     };
 
     const handleStealCommand = (arg, senderName) => {
-        const relSlot = parseInt(arg);
+        const relSlot = ((parseInt(arg) - 1) % 4 + 4) % 4 + 1;
         if (isNaN(relSlot) || relSlot < 1 || relSlot > 4) {
             chatMessage("Usage: /mlb steal [1-4]");
             return;
@@ -903,6 +903,7 @@
         match.steal.active      = true;
         match.steal.targetSlot  = targetAbsSlot;
         match.steal.team        = hittingSide;
+        limitsStr               = getStealLimitsString();
         chatMessage(`Steal Attempt: ${targetName} | Steal Counter: ${limitsStr}`);
     };
 
@@ -973,7 +974,7 @@
                                     config.stealers         = [awayStealerSlot, homeStealerSlot];
                                     const awayStealerName   = getPlayerNameAtTeamId(awayStealerSlot);
                                     const homeStealerName   = getPlayerNameAtTeamId(homeStealerSlot);
-                                    systemMessage(`Stealers: ${awayStealerName}, ${homeStealerName}`);
+                                    chatMessage(`Stealers: ${awayStealerName}, ${homeStealerName}`);
                                 } else systemMessage("Error: Use /mlb setStealers [1-4] [5-8]");
                             }
                             else if (cmd === "setgame") {
@@ -986,7 +987,7 @@
                                 if (!isNaN(num) && num >= 0 && num <= 8) { 
                                     config.hostId   = num; 
                                     const hName     = num === 0 ? "Spectator" : getPlayerNameAtTeamId(num);
-                                    systemMessage(`Host: ${hName}`); 
+                                    chatMessage(`Host: ${hName}`); 
                                 } else systemMessage("Error: Use /mlb setHost [0-8]");
                             }
                             else if (cmd === "setseries") {
