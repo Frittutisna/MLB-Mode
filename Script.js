@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.3
+// @version      0-beta.0.3.1
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -836,8 +836,11 @@
             return;
         }
 
+        const lockedStealSlot   = match.steal.targetSlot;
+        const lockedStealName   = getPlayerNameAtTeamId(lockedStealSlot);
+        const limitsStr         = getStealLimitsString();
         if (match.steal.active) {
-            chatMessage("Error: Steal attempt has already been locked in");
+            chatMessage(`Error: Steal attempt has already been locked in against ${lockedStealName} | Steal Counter: ${limitsStr}`);
             return;
         }
 
@@ -853,26 +856,33 @@
         const hittingSlots      = (match.possession === 'away') ?   currentAwaySlots        : currentHomeSlots;
         
         if (!hittingSlots.includes(teamNum) || !config.captains.includes(teamNum)) {
-            chatMessage("Error: Only the Hitting Captain can Steal");
+            chatMessage(`Error: Only the Hitting Captain can Steal | Steal Counter: ${limitsStr}`);
             return;
         }
 
         const hittingSide   = match.possession;
         const pitchingSlots = (match.possession === 'away') ? currentHomeSlots : currentAwaySlots;
         const targetAbsSlot = pitchingSlots[relSlot - 1];
-        const targetIdx     = targetAbsSlot - 1; 
+        const targetIdx     = targetAbsSlot - 1;
+        const targetName    = getPlayerNameAtTeamId(targetAbsSlot);
 
-        if (match.stealLimits[hittingSide] <= 0 || match.targetLimits[targetIdx] <= 0) {
-            chatMessage("Error: Out of Steal attempts");
+        if (match.stealLimits[hittingSide] <= 0) {
+            chatMessage(`Error: Out of all Steal attempts | Steal Counter: ${limitsStr}`);
             return;
         }
 
-        const nextSong      = match.songNumber + 1;
-        const batterIdx     = getBatterIndex(nextSong);
-        const nextPitcher   = pitchingSlots[batterIdx];
+        if (match.targetLimits[targetIdx] <= 0) {
+            chatMessage(`Error: Out of Steal attempt(s) against ${targetName} | Steal Counter: ${limitsStr}`);
+            return;
+        }
+
+        const nextSong          = match.songNumber + 1;
+        const batterIdx         = getBatterIndex(nextSong);
+        const nextPitcherSlot   = pitchingSlots[batterIdx];
+        const nextPitcherName   = getPlayerNameAtTeamId(nextPitcherSlot);
         
-        if (targetAbsSlot === nextPitcher) {
-            chatMessage("Error: Cannot Steal against the Pitcher");
+        if (targetAbsSlot === nextPitcherSlot) {
+            chatMessage(`Error: Cannot Steal against the Pitcher (currently ${nextPitcherName}) | Steal Counter: ${limitsStr}`);
             return;
         }
 
@@ -882,9 +892,6 @@
         match.steal.active      = true;
         match.steal.targetSlot  = targetAbsSlot;
         match.steal.team        = hittingSide;
-
-        const targetName    = getPlayerNameAtTeamId(targetAbsSlot);
-        const limitsStr     = getStealLimitsString();
         chatMessage(`Steal Attempt: ${targetName} | Steal Counter: ${limitsStr}`);
     };
 
