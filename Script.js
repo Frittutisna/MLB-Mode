@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.3.1
+// @version      0-beta.0.3.2
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -21,7 +21,7 @@
         totalSongs          : 30,     
         isSwapped           : false,
         isTest              : false,
-        seriesLength        : 7,
+        seriesLength        : 5,
         seriesStats         : {awayWins: 0, homeWins: 0, history: []},
         links               : {
             guide           : "https://github.com/Frittutisna/MLB-Mode/blob/main/Guide.md",
@@ -105,9 +105,9 @@
         "resetEverything"   : "Wipe everything and reset to default",
         "resetGame"         : "Wipe game progress and stop tracker",
         "resetSeries"       : "Wipe game/series progress and reset to Game 1",
-        "setGame"           : "Set the current game number (/mlb setGame [1-7], defaults to 1)",
+        "setGame"           : "Set the current game number (/mlb setGame [1-5], defaults to 1)",
         "setHost"           : "Set the script host (/mlb setHost [0-8], defaults to -1 and can't start unless changed)",
-        "setSeries"         : "Set the series length (/mlb setSeries [1/2/7], defaults to 7)",
+        "setSeries"         : "Set the series length (/mlb setSeries [1/2/3/5], defaults to 5)",
         "setTeams"          : "Set team names (/mlb setTeams [Away] [Home])",
         "setTest"           : "Enable/disable loose lobby validation (/mlb setTest [true/false])",
         "start"             : "Start the game tracker",
@@ -429,8 +429,8 @@
     const printHowTo = () => {
         systemMessage("1. /mlb setHost [0-8]: Set the slot of the lobby host, defaults to -1 and cannot start unless changed");
         systemMessage("2. /mlb setTeams [Away] [Home]: Set the team names, defaults to Away and Home");
-        systemMessage("3. /mlb setSeries [1/2/7]: Set the series length, defaults to 7");
-        systemMessage("4. /mlb setGame [1-7]: Set the game number, defaults to 1");
+        systemMessage("3. /mlb setSeries [1/2/3/5]: Set the series length, defaults to 5");
+        systemMessage("4. /mlb setGame [1-5]: Set the game number, defaults to 1");
         systemMessage("5. /mlb start: Start the game");
     };
 
@@ -952,8 +952,8 @@
                             }
                             else if (cmd === "setgame") {
                                 const num = parseInt(parts[2]);
-                                if (num >= 1 && num <= 7) {config.gameNumber = num; systemMessage(`Game Number: ${num}`)}
-                                else systemMessage("Error: Use /mlb setGame [1-7]");
+                                if (num >= 1 && num <= 5) {config.gameNumber = num; systemMessage(`Game Number: ${num}`)}
+                                else systemMessage("Error: Use /mlb setGame [1-5]");
                             }
                             else if (cmd === "sethost") {
                                 const num = parseInt(parts[2]);
@@ -965,8 +965,8 @@
                             }
                             else if (cmd === "setseries") {
                                 const num = parseInt(parts[2]);
-                                if ([1, 2, 7].includes(num)) {config.seriesLength = num; systemMessage(`Series Length: ${num}`)}
-                                else systemMessage("Error: Use /mlb setSeries [1/2/7]");
+                                if ([1, 2, 3, 5].includes(num)) {config.seriesLength = num; systemMessage(`Series Length: ${num}`)}
+                                else systemMessage("Error: Use /mlb setSeries [1/2/3/5]");
                             }
                             else if (cmd === "settest") {
                                 const b = parseBool(parts[2]);
