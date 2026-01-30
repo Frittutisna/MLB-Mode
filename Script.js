@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.3.4
+// @version      0-beta.0.3.5
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -845,9 +845,9 @@
             return;
         }
 
-        const lockedStealSlot   = match.steal.targetSlot;
-        const lockedStealName   = getPlayerNameAtTeamId(lockedStealSlot);
-        const limitsStr         = getStealLimitsString();
+        const   lockedStealSlot = match.steal.targetSlot;
+        const   lockedStealName = getPlayerNameAtTeamId(lockedStealSlot);
+        let     limitsStr       = getStealLimitsString();
         if (match.steal.active) {
             chatMessage(`Error: Steal attempt has already been locked in against ${lockedStealName} | Steal Counter: ${limitsStr}`);
             return;
