@@ -1,10 +1,11 @@
-# MLB Mode v0-beta.0.3.5
+# MLB Mode v0-rc.0.0
 
 ## Table of Contents
 - [TLDR: What Do I Do?](#tldr-what-is-this-and-what-do-i-do)
 - [Links: Balancer, Flowchart, PowerPoint, Script](#links-balancer-flowchart-powerpoint-script)
 - [Overview: Those Long Setting Codes](#overview-those-long-setting-codes)
 - [Comparison: What's The Difference?](#comparison-whats-the-difference)
+- [Changelog: What Changed From v0-beta.0](#changelog-what-changed-from-v0-beta0)
 - [Lineup: Away and Home, Captains](#lineup-away-and-home-captains)
 - [Score: Check the (T)DIFF](#score-check-the-tdiff)
 - [Ending: Mercy Rule, Tiebreakers](#ending-mercy-rule-tiebreakers)
@@ -19,7 +20,7 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
     - Read the [PowerPoint](#links-balancer-flowchart-powerpoint-script)
 - If you're **just watching**: Grab a bowl of popcorn before spectating the lobby of your choice.
 - **Unless you have to, feel more than welcome to stop reading this guide here.** I promise you, unless you **really** have to, you **shouldn't** read the rest of this guide.
-- If you're **hosting the tour**, **hosting a lobby** for your team, or the **Captain** (you have the highest **Random** Elo) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
+- If you're **hosting the tour**, **hosting a lobby** for your team, or the **team Stealer** (you're the team Captain by having the highest **Random** Elo, or your team Captain has designated you as one) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
 
 ## Links: Balancer, Flowchart, PowerPoint, Script
 - [Link to the Balancer](https://github.com/Frittutisna/Balancer)
@@ -40,7 +41,7 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
     </tr>
     <tr>
         <td style="text-align:center">Regulation</td>
-        <td style="text-align:center">2 hours</td>
+        <td style="text-align:center">90 minutes</td>
         <td style="text-align:center">16-30</td>
         <td style="text-align:center">20</td>
         <td style="text-align:center">0-100</td>
@@ -71,9 +72,9 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
     <tbody>
         <tr>
             <td style="text-align:center">Estimated Runtime</td>
-            <td style="text-align:center">2 hours</td>
-            <td style="text-align:center">1.5 hours</td>
-            <td style="text-align:center" colspan="2">1 hour</td>
+            <td style="text-align:center">90 minutes</td>
+            <td style="text-align:center">75 minutes</td>
+            <td style="text-align:center" colspan="2">60 minutes</td>
         </tr>
         <tr>
             <td style="text-align:center">Song Count</td>
@@ -140,8 +141,19 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
     </tbody>
 </table>
 
+## Changelog: What Changed From v0-beta.0
+### Format Changes
+- Changed maximum tour length from 7 games to 5
+### Script Changes
+- Split Captain role into Captain and **Stealer**
+- Added `/mlb setStealers [1-4] [5-8]` to set Stealers
+- Added `/mlb counter` to view live Steal Counter
+- Improved Steal clarity
+- Changed `Next: A vs B` to `Next: Hitter A vs Pitcher B`
+- Added `Next: Hitter A vs Pitcher B` to `/mlb start`
+
 ## Lineup: Away And Home, Captains
-The team listed first (above) on Challonge is the **Away** team for each series. Line up as follows before each series: **Away** (Slots 1-4: T1, T2, T3, T4), then **Home** (Slots 5-8: T1, T2, T3, T4). The T1 of each team is also designated as their **Captain**, which carries a **double multiplier** for their correct guesses. There is **no need to swap** Slots between consecutive games; the Script does that **automatically**. 
+The team listed first (above) on Challonge is the **Away** team for each series. Line up as follows before each series: **Away** (Slots 1-4: T1, T2, T3, T4), then **Home** (Slots 5-8: T1, T2, T3, T4). The T1 of each team is also designated as their **Captain**, which carries a **+1 bonus** for their correct guesses. Captains are normally **Stealers** as well, but they can delegate that role to their teammate if they so choose. 
  
 ## Score: Check the (T)DIFF
 <details>
@@ -207,7 +219,7 @@ The team listed first (above) on Challonge is the **Away** team for each series.
 ### Steal: Isn't That A Bad Thing?
 <details>
     <summary><b>Click to know more about Stealing</b></summary>
-    <p>The Hitting Captain can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code> against Non-Pitchers (e.g., on Song 14, Slots 2 and/or 6 cannot be targeted). Captains can be targeted twice, but non-Captains can only be targeted once. Two requirements have to be fulfilled for a Steal attempt to be <b>successful</b>: the next song must be a <code>Hit</code> (not a <code>Strikeout</code> or a <code>Flyout</code>), and the targeted player must <b>miss</b> the song. If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. If either fails, the Hitting team is <b>Caught Stealing</b> and the song is automatically ruled an Out.</p>
+    <p>The Hitting Stealer can declare a <b>Steal</b> attempt using <code>/mlb steal [1-4]</code> against Non-Pitchers (e.g., on Song 14, Slots 2 and/or 6 cannot be targeted). Captains can be targeted twice, but non-Captains can only be targeted once. Two requirements have to be fulfilled for a Steal attempt to be <b>successful</b>: the next song must be a <code>Hit</code> (not a <code>Strikeout</code> nor a <code>Flyout</code>), and the targeted player must <b>miss</b> the song. If both holds, the Hitting team can move forward 1 more base on top of the Song outcome. If either fails, the Hitting team is <b>Caught Stealing</b> and the song is automatically ruled an Out.</p>
 </details>
 
 ## Ending: Mercy Rule, Tiebreakers
@@ -219,11 +231,11 @@ Mercy Rule triggers if the trailing team can't catch with the songs left. If Reg
 5. Defending Team for Song 30
 
 ## Format: Best-Of-7, Round Robin, Knockouts
-The script will automatically swap Away and Home teams between consecutive games.
-- **For 2 teams**: Play a best-of-7.
-- **For 4 teams**: Play a double round-robin. The top two teams advance to the **World Series**.
-- **For 6 teams**: Play a single round-robin. The top four teams advance to the **Championship Series**, then the winners advance to the **World Series**.
-- **For 8 teams**: Play a double round-robin in 2 conferences. The conference winners advance to the **World Series**.
+The script will automatically swap Away and Home teams between consecutive games. For ≥4 teams, the top two then advance to the **World Series**
+- **For 2 teams**: Play a best-of-5.
+- **For 4 teams**: Play a single round-robin.
+- **For 6 teams**: Play a 3-round Swiss league.
+- **For 8 teams**: Play a 4-round Swiss league.
 
 ## Manual: What Do I *Really* Do?
 ### If you're hosting the tour:
@@ -233,7 +245,7 @@ The script will automatically swap Away and Home teams between consecutive games
 - Read the [Format](#format-best-of-7-round-robin-knockouts) section and prepare the Challonge.
 - Announce team compositions, as well as Challonge and lobby links.
 - Note the results of each game in Challonge.
-- If necessary, ping teams that advance to the **Championship Series** and/or the **World Series**.
+- If necessary, ping teams that advance to the **World Series**.
 - Announce the final results.
 
 ### If you're hosting a lobby for your team:
@@ -244,5 +256,5 @@ Install the [Script](#links-balancer-flowchart-powerpoint-script) (**only** the 
 - The Script will automatically download the **Scoresheet** after each Game. Open it on your browser, copy the top row, then paste it in `#game-reporting` with the Scoresheet and JSON.
 - Repeat from Step 1 for a new lobby, from Step 2 for the same lobby and a new opponent, or from Step 3 for the same lobby and opponent.
 
-### If you're the Captain of your team:
+### If you're the team Stealer:
 - See [Steal: Isn't That A Bad Thing?](#steal-isnt-that-a-bad-thing)

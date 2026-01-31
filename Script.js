@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-beta.0.3.5
+// @version      0-rc.0.0
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -75,7 +75,7 @@
         "non-pitchers"      : "Teammates of the Pitcher. Can prevent Non-Batters from improving a Hit",
         "hitting"           : "The team currently attacking. Swaps after 3 Outs",
         "pitching"          : "The team currently defending. Swaps after 3 Outs",
-        "captain"           : "Slots 1 and 5. Correct guesses count double for (O)DIFF",
+        "captain"           : "Slots 1 and 5. Correct guesses carry +1 bonus for (O)DIFF",
         "diff"              : "Batter - Pitcher, 1v1. Strikeout if < 0",
         "odiff"             : "Non-Batters - Non-Pitchers, 3v3. Only counts if DIFF ≥ 0",
         "tdiff"             : "DIFF + max(0, ODIFF). Determines hit type: Home Run > Triple > Double > Single > Flyout",
