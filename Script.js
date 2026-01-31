@@ -908,15 +908,21 @@
     };
 
     const setup = () => {
-        new Listener("Host Game",       (p) => {playersCache = p.players})                                                      .bindListener();
-        new Listener("Join Game",       (p) => {
+        new Listener("Host Game",                   (p) => {playersCache = p.players})                                                      .bindListener();
+        new Listener("Join Game",                   (p) => {
             if      (p.quizState)   playersCache = p.quizState.players;
             else if (p.players)     playersCache = p.players;
         }).bindListener();
-        new Listener("Game Starting",   (p) => {playersCache = p.players})                                                      .bindListener();
-        new Listener("Player Left",     (p) => {playersCache = playersCache.filter(x => x.gamePlayerId !== p.gamePlayerId)})    .bindListener();
-        new Listener("New Player",      (p) => {playersCache.push(p)})                                                          .bindListener();
-        
+        new Listener("Game Starting",               (p) => {playersCache = p.players})                                                      .bindListener();
+        new Listener("Player Left",                 (p) => {playersCache = playersCache.filter(x => x.gamePlayerId !== p.gamePlayerId)})    .bindListener();
+        new Listener("New Player",                  (p) => {playersCache.push(p)})                                                          .bindListener();
+        new Listener("Spectator Change To Player",  (p) => {playersCache.push(p)})                                                          .bindListener();
+
+        new Listener("Player Change Team", (p) => {
+            const player = playersCache.find(x => x.gamePlayerId === p.gamePlayerId);
+            if (player) player.teamNumber = p.newTeam;
+        }).bindListener();
+
         new Listener("game chat update", (payload) => {
             payload.messages.forEach(msg => {
                 if (msg.message.startsWith("/mlb")) {
