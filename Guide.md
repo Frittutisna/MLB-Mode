@@ -150,7 +150,6 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
 - Added `/mlb counter` to view live Steal Counter
 - Improved Steal clarity
 - Changed `Next: A vs B` to `Next: Hitter A vs Pitcher B`
-- Added `Next: Hitter A vs Pitcher B` to `/mlb start`
 
 ## Lineup: Away And Home, Captains
 The team listed first (above) on Challonge is the **Away** team for each series. Line up as follows before each series: **Away** (Slots 1-4: T1, T2, T3, T4), then **Home** (Slots 5-8: T1, T2, T3, T4). The T1 of each team is also designated as their **Captain**, which carries a **+1 bonus** for their correct guesses. Captains are normally **Stealers** as well, but they can delegate that role to their teammate if they so choose. 
