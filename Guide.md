@@ -2,14 +2,14 @@
 
 ## Table of Contents
 - [TLDR: What Do I Do?](#tldr-what-is-this-and-what-do-i-do)
-- [Links: Balancer, Flowchart, PowerPoint, Script](#links-balancer-flowchart-powerpoint-script)
+- [Links: Balancer, Flowchart, Many Others](#links-balancer-flowchart-many-others)
 - [Overview: Those Long Setting Codes](#overview-those-long-setting-codes)
 - [Comparison: What's The Difference?](#comparison-whats-the-difference)
 - [Changelog: What Changed From v0-beta.0](#changelog-what-changed-from-v0-beta0)
 - [Lineup: Away and Home, Captains](#lineup-away-and-home-captains)
 - [Score: Check the (T)DIFF](#score-check-the-tdiff)
 - [Ending: Mercy Rule, Tiebreakers](#ending-mercy-rule-tiebreakers)
-- [Format: Best-of-7, Round Robin, Knockouts](#format-best-of-7-round-robin-knockouts)
+- [Format: Best-of-5, Round Robin, Swiss](#format-best-of-5-round-robin-swiss)
 - [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do)
 
 ## TLDR: What Is This And What Do I Do?
@@ -17,16 +17,18 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
 - If you're **just playing**: Join the right lobby, line up correctly, and click Ready. If you're confused about anything, you can (in order of priority):
     - Just play along. People often say this is a game mode best understood through playing, not reading
     - Try `/mlb help` or `/mlb whatIs` in the chat, or
-    - Read the [PowerPoint](#links-balancer-flowchart-powerpoint-script)
+    - Read the [PowerPoint](#links-balancer-flowchart-many-others)
 - If you're **just watching**: Grab a bowl of popcorn before spectating the lobby of your choice.
 - **Unless you have to, feel more than welcome to stop reading this guide here.** I promise you, unless you **really** have to, you **shouldn't** read the rest of this guide.
 - If you're **hosting the tour**, **hosting a lobby** for your team, or the **team Stealer** (you're the team Captain by having the highest **Random** Elo, or your team Captain has designated you as one) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
 
-## Links: Balancer, Flowchart, PowerPoint, Script
+## Links: Balancer, Flowchart, Many Others
 - [Link to the Balancer](https://github.com/Frittutisna/Balancer)
 - [Link to the Flowchart](https://github.com/Frittutisna/MLB-Mode/blob/main/Flowchart/Flowchart.pdf)
+- [Link to the Player Card](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Player.png)
 - [Link to the PowerPoint](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/PowerPoint.pdf)
 - [Link to the Script](https://github.com/Frittutisna/MLB-Mode/blob/main/Script.js)
+- [Link to the Stealer Card](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Stealer.png)
 
 ## Overview: Those Long Setting Codes
 <table style="text-align:center">
@@ -229,7 +231,7 @@ Mercy Rule triggers if the trailing team can't catch with the songs left. If Reg
 4. T3s (Slots 3 vs 7)
 5. Defending Team for Song 30
 
-## Format: Best-Of-7, Round Robin, Knockouts
+## Format: Best-Of-5, Round Robin, Swiss
 The script will automatically swap Away and Home teams between consecutive games. For ≥4 teams, the top two then advance to the **World Series**
 - **For 2 teams**: Play a best-of-5.
 - **For 4 teams**: Play a single round-robin.
@@ -239,16 +241,16 @@ The script will automatically swap Away and Home teams between consecutive games
 ## Manual: What Do I *Really* Do?
 ### If you're hosting the tour:
 - Open the tour signup prompt and ask for team requests and/or blacklists.
-- After the player list has been settled, find the [Balancer](#links-balancer-flowchart-powerpoint-script) and follow the instructions there.
+- After the player list has been settled, find the [Balancer](#links-balancer-flowchart-many-others) and follow the instructions there.
 - If the tour has ≥4 teams, ask for 1 lobby host volunteer from each team.
-- Read the [Format](#format-best-of-7-round-robin-knockouts) section and prepare the Challonge.
+- Read the [Format](#format-best-of-5-round-robin-swiss) section and prepare the Challonge.
 - Announce team compositions, as well as Challonge and lobby links.
 - Note the results of each game in Challonge.
 - If necessary, ping teams that advance to the **World Series**.
 - Announce the final results.
 
 ### If you're hosting a lobby for your team:
-Install the [Script](#links-balancer-flowchart-powerpoint-script) (**only** the lobby host needs to install and operate the **Script**) on your browser through TamperMonkey, then do the following:
+Install the [Script](#links-balancer-flowchart-many-others) (**only** the lobby host needs to install and operate the **Script**) on your browser through TamperMonkey, then do the following:
 - Apply the setting code (see [Overview](#overview-those-long-setting-codes)).
 - Invite the right players to the lobby, make sure they're lined up correctly (see [Lineup](#lineup-away-and-home-captains)), then type `/mlb howTo` and follow the instructions there.
 - After everyone is ready, type `/mlb start` and start playing. If you started the game by mistake, type `/mlb resetGame`, return to lobby, then type `/mlb start` to restart.
@@ -256,4 +258,4 @@ Install the [Script](#links-balancer-flowchart-powerpoint-script) (**only** the 
 - Repeat from Step 1 for a new lobby, from Step 2 for the same lobby and a new opponent, or from Step 3 for the same lobby and opponent.
 
 ### If you're the team Stealer:
-- See [Steal: Isn't That A Bad Thing?](#steal-isnt-that-a-bad-thing)
+- See the [Stealer Card](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Stealer.png)

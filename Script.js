@@ -27,7 +27,9 @@
         links               : {
             guide           : "https://github.com/Frittutisna/MLB-Mode/blob/main/Guide.md",
             flowchart       : "https://github.com/Frittutisna/MLB-Mode/blob/main/Flowchart/Flowchart.pdf",
-            powerpoint      : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/PowerPoint.pdf"
+            powerpoint      : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/PowerPoint.pdf",
+            playerCard      : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Player.png",
+            stealerCard     : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Stealer.png"
         },
         selectors           : {
             playIcon        : "fa-play-circle",
@@ -103,6 +105,8 @@
         "flowchart"         : "Show link to the flowchart",
         "guide"             : "Show link to the guide",
         "powerpoint"        : "Show link to the PowerPoint",
+        "playerCard"        : "Show link to the Player Card",
+        "stealerCard"       : "Show link to the Stealer Card",
         "howTo"             : "Show the step-by-step setup tutorial",
         "resetEverything"   : "Wipe everything and reset to default",
         "resetGame"         : "Wipe game progress and stop tracker",
@@ -921,7 +925,7 @@
                     const arg       = parts.slice(2).join(" ").toLowerCase();
                     const isHost    = (msg.sender === selfName);
                     
-                    if (["flowchart", "guide", "powerpoint", "help", "whatis"].includes(cmd)) {
+                    if (["flowchart", "guide", "powerpoint", "playercard", "stealercard", "help", "whatis"].includes(cmd)) {
                         setTimeout(() => {
                             const mySlot = getSelfSlot();
                             if (config.hostId !== -1 && config.hostId === mySlot) {
@@ -936,6 +940,8 @@
                                 else if (cmd === "flowchart")   chatMessage(`Flowchart: ${config.links.flowchart}`);
                                 else if (cmd === "guide")       chatMessage(`Guide: ${config.links.guide}`);
                                 else if (cmd === "powerpoint")  chatMessage(`PowerPoint: ${config.links.powerpoint}`);
+                                else if (cmd === "playercard")  chatMessage(`Player Card: ${config.links.playerCard}`);
+                                else if (cmd === "stealercard") chatMessage(`Stealer Card: ${config.links.stealerCard}`);
                             }
                         }, config.delay);
                         return;
