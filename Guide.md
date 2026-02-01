@@ -15,9 +15,9 @@
 ## TLDR: What Is This And What Do I Do?
 In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
 - If you're **just playing**: Join the right lobby, line up correctly, and click Ready. If you're confused about anything, you can (in order of priority):
+    - Read the [Player Card](#links-balancer-flowchart-many-others)
     - Just play along. People often say this is a game mode best understood through playing, not reading
     - Try `/mlb help` or `/mlb whatIs` in the chat, or
-    - Read the [PowerPoint](#links-balancer-flowchart-many-others)
 - If you're **just watching**: Grab a bowl of popcorn before spectating the lobby of your choice.
 - **Unless you have to, feel more than welcome to stop reading this guide here.** I promise you, unless you **really** have to, you **shouldn't** read the rest of this guide.
 - If you're **hosting the tour**, **hosting a lobby** for your team, or the **team Stealer** (you're the team Captain by having the highest **Random** Elo, or your team Captain has designated you as one) of your team, see [Manual: What Do I *Really* Do?](#manual-what-do-i-really-do).
