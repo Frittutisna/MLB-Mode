@@ -644,9 +644,10 @@
             }
         } 
 
+        const hittingTeamName = getCleanTeamName(match.possession);
         let fullMsg = "";
-        if (resStr === "Strikeout") fullMsg = `${directStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
-        else                        fullMsg = `${directStr} ${supportStr} ${stateStr} ${resStr} ${displayScore}${nextMsg}`;
+        if (resStr === "Strikeout") fullMsg = `${directStr} ${stateStr} ${hittingTeamName} ${resStr} ${displayScore}${nextMsg}`;
+        else                        fullMsg = `${directStr} ${supportStr} ${stateStr} ${hittingTeamName} ${resStr} ${displayScore}${nextMsg}`;
 
         const awayRaw = [1, 2, 3, 4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i - 1] : gameConfig.awaySlots[i - 1]) ? 1 : 0);
         const homeRaw = [1, 2, 3, 4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i - 1] : gameConfig.homeSlots[i - 1]) ? 1 : 0);
