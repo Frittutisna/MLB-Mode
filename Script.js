@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-rc.0.1
+// @version      0-rc.0.2
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -174,14 +174,20 @@
                 ctx.fillText(text, x, y);
             };
 
-            const drawStealBoxes = (slots, limits, yPos, teamColor, isHittingTeam, nextPitcherSlot) => {
+            const drawStealBoxes = (slots, yPos, teamColor, isHittingTeam, nextPitcherSlot) => {
                 const boxW = (colNameW - (3 * gap)) / 4;
                 slots.forEach((slot, idx) => {
                     const arrIdx    = slot - 1;
                     const val       = data.targetLimits[arrIdx];
                     const isCap     = config.captains.includes(slot);
                     let fillColor   = teamColor;
-                    let txt         = val > 0 ? val.toString() : "";
+
+                    let txt = "";
+                    if (val > 0) {
+                        txt = val.toString();
+                        if (isCap) txt = "★" + txt;
+                    }
+
                     if (isHittingTeam || val <= 0 || slot === nextPitcherSlot) {
                         fillColor = cBlack;
                         if (val <= 0) txt = "";
@@ -190,30 +196,28 @@
                     const bx        = (boxW + gap) * idx;
                     ctx.fillStyle   = fillColor;
                     ctx.fillRect(bx, yPos, boxW, boxH);
-
-                    if (isCap) {
-                            drawText("★",  bx + 15,            yPos + boxH / 2, 20, cWhite);
-                            drawText(txt,   bx + boxW / 2 + 5,  yPos + boxH / 2, 30, cWhite);
-                    } else  drawText(txt,   bx + boxW / 2,      yPos + boxH / 2, 30, cWhite);
+                    drawText(txt, bx + boxW / 2, yPos + boxH / 2, 35, cWhite);
                 });
             };
 
-            let awayColor = cBlue;
-            let homeColor = cOrange;
-            
+            let awayColor   = cBlue;
+            let homeColor   = cOrange;            
+            const awayAbbr  = data.awayName.substring(0, 3).toUpperCase();
+            const homeAbbr  = data.homeName.substring(0, 3).toUpperCase();
+
             ctx.fillStyle = awayColor;
             ctx.fillRect(0, 0, colNameW, nameH);
-            drawText(data.awayName, colNameW / 2, nameH / 2, 60, cWhite);
+            drawText(awayAbbr, colNameW / 2, nameH / 2, 80, cWhite);
 
             const boxY1 = nameH         + gap;
             const boxY2 = boxY1 + boxH  + gap;
-            drawStealBoxes(data.awaySlots, data.targetLimits, boxY1, awayColor, data.nextPoss === 'away', data.nextPitcherSlot);
-            drawStealBoxes(data.homeSlots, data.targetLimits, boxY2, homeColor, data.nextPoss === 'home', data.nextPitcherSlot);
+            drawStealBoxes(data.awaySlots, boxY1, awayColor, data.nextPoss === 'away', data.nextPitcherSlot);
+            drawStealBoxes(data.homeSlots, boxY2, homeColor, data.nextPoss === 'home', data.nextPitcherSlot);
 
             const homeNameY = boxY2 + boxH + gap;
             ctx.fillStyle   = homeColor;
             ctx.fillRect(0, homeNameY, colNameW, nameH);
-            drawText(data.homeName, colNameW / 2, homeNameY + nameH / 2, 60, cWhite);
+            drawText(homeAbbr, colNameW / 2, homeNameY + nameH / 2, 80, cWhite);
 
             const scoreH = (homeNameY + nameH) / 2;
             const scoreX = colNameW + gap;
@@ -228,30 +232,38 @@
 
             const stateX    = scoreX    + colScoreW + gap;
             const mainH     = homeNameY + nameH;
-            ctx.fillStyle   = cBlack;
-            ctx.fillRect(stateX, 0, colStateW, mainH);
+            const arrowBoxW = 90;
+            const fieldBoxW = colStateW - arrowBoxW - gap;
+            const arrowBoxX = stateX;
+            const fieldBoxX = stateX + arrowBoxW + gap;
 
-            const centerX   = stateX + colStateW / 2;            
-            const arrowSize = 25;
-            if (data.nextPoss === 'away') {
-                ctx.beginPath();
-                ctx.moveTo(centerX,             40);
-                ctx.lineTo(centerX - arrowSize, 70);
-                ctx.lineTo(centerX + arrowSize, 70);
-                ctx.fillStyle = cGold;
-                ctx.fill();
-            }
-            if (data.nextPoss === 'home') {
-                ctx.beginPath();
-                ctx.moveTo(centerX,             mainH - 40);
-                ctx.lineTo(centerX - arrowSize, mainH - 70);
-                ctx.lineTo(centerX + arrowSize, mainH - 70);
-                ctx.fillStyle = cGold;
-                ctx.fill();
-            }
+            ctx.fillStyle = cBlack;
+            ctx.fillRect(arrowBoxX, 0, arrowBoxW, mainH);
+            ctx.fillRect(fieldBoxX, 0, fieldBoxW, mainH);
 
-            const diamondSize   = 35;
-            const dy            = mainH / 2 - 20;
+            const arrowCenterX = arrowBoxX + arrowBoxW / 2;
+            const arrowSize    = 20;
+
+            ctx.beginPath();
+            ctx.moveTo(arrowCenterX,             40);
+            ctx.lineTo(arrowCenterX - arrowSize, 70);
+            ctx.lineTo(arrowCenterX + arrowSize, 70);
+            ctx.fillStyle = (data.nextPoss === 'away') ? cGold : cWhite;
+            ctx.fill();
+
+            if (data.songNumber) drawText(data.songNumber.toString(), arrowCenterX, mainH / 2, 40, cWhite);
+
+            ctx.beginPath();
+            ctx.moveTo(arrowCenterX,             mainH - 40);
+            ctx.lineTo(arrowCenterX - arrowSize, mainH - 70);
+            ctx.lineTo(arrowCenterX + arrowSize, mainH - 70);
+            ctx.fillStyle = (data.nextPoss === 'home') ? cGold : cWhite;
+            ctx.fill();
+
+            const fieldCenterX = fieldBoxX + fieldBoxW / 2;
+            const diamondSize  = 35; 
+            const dy           = mainH / 2 - 20;
+            const baseGap      = 5; 
             
             const drawBase = (x, y, filled) => {
                 ctx.beginPath();
@@ -267,9 +279,9 @@
                 ctx.stroke();
             };
 
-            drawBase(centerX, dy - diamondSize, data.bases[1]);
-            drawBase(centerX + diamondSize, dy, data.bases[0]);
-            drawBase(centerX - diamondSize, dy, data.bases[2]);
+            drawBase(fieldCenterX,                          dy - diamondSize - baseGap, data.bases[1]);
+            drawBase(fieldCenterX + diamondSize + baseGap,  dy,                         data.bases[0]);
+            drawBase(fieldCenterX - diamondSize - baseGap,  dy,                         data.bases[2]);
 
             const outY = dy + diamondSize + 40;
             const outR = 15;
@@ -281,8 +293,8 @@
                 ctx.stroke();
             };
             
-            drawOut(centerX - 25, data.outs >= 1);
-            drawOut(centerX + 25, data.outs >= 2);
+            drawOut(fieldCenterX - 25, data.outs >= 1);
+            drawOut(fieldCenterX + 25, data.outs >= 2);
 
             const bannerY   = mainH + gap;
             const bannerH   = 70;
@@ -298,22 +310,24 @@
             const footerY   = bannerY + bannerH + gap;
             const footerH   = 60;
             const fW        = canvas.width;
-            const sideW     = (fW - 100) / 2;
             const tierW     = 100;
+            const sideW     = (fW - tierW - (2 * gap)) / 2;
 
             const hitColor  = data.nextPoss === 'away' ? awayColor : homeColor;
             ctx.fillStyle   = hitColor;
             ctx.fillRect(0, footerY, sideW, footerH);
             drawText(data.nextHitterName, sideW / 2, footerY + footerH / 2, 30, cWhite);
 
-            ctx.fillStyle = cBlack;
-            ctx.fillRect(sideW, footerY, tierW, footerH);
-            drawText(data.nextTier, sideW + tierW / 2, footerY + footerH / 2, 30, cWhite);
+            const tierX     = sideW + gap;
+            ctx.fillStyle   = cBlack;
+            ctx.fillRect(tierX, footerY, tierW, footerH);
+            drawText(data.nextTier, tierX + tierW / 2, footerY + footerH / 2, 30, cWhite);
 
-            const pitColor  = data.nextPoss === 'away' ? homeColor : awayColor;
-            ctx.fillStyle   = pitColor;
-            ctx.fillRect(sideW + tierW, footerY, sideW, footerH);
-            drawText(data.nextPitcherName, sideW + tierW + sideW / 2, footerY + footerH / 2, 30, cWhite);
+            const pitColor = data.nextPoss === 'away' ? homeColor : awayColor;
+            const pitX     = tierX + tierW + gap;
+            ctx.fillStyle  = pitColor;
+            ctx.fillRect(pitX, footerY, sideW, footerH);
+            drawText(data.nextPitcherName, pitX + sideW / 2, footerY + footerH / 2, 30, cWhite);
 
             canvas.toBlob((blob) => {resolve(blob)});
         });
@@ -862,6 +876,7 @@
         const sendChatAndEnd = (finalMsg) => {
             if (!isGameEnd) {
                 const scorebugData = {
+                    songNumber      : match.songNumber,
                     awayName        : getCleanTeamName('away'),
                     homeName        : getCleanTeamName('home'),
                     scoreAway       : match.totalScore.away,
