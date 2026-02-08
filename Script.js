@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-rc.0.0
+// @version      0-rc.0.1
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -18,8 +18,8 @@
         hostId              : -1,
         teamNames           : {away: "Away", home: "Home"},
         captains            : [1, 5],
-        stealers            : [1, 5], 
-        totalSongs          : 30,     
+        stealers            : [1, 5],
+        totalSongs          : 30,
         isSwapped           : false,
         isTest              : false,
         seriesLength        : 5,
@@ -29,7 +29,8 @@
             flowchart       : "https://github.com/Frittutisna/MLB-Mode/blob/main/Flowchart/Flowchart.pdf",
             powerpoint      : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/PowerPoint.pdf",
             playerCard      : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Player.png",
-            stealerCard     : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Stealer.png"
+            stealerCard     : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Stealer.png",
+            exampleCard     : "https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Example.png"
         },
         selectors           : {
             playIcon        : "fa-play-circle",
@@ -48,23 +49,23 @@
         songNumber      : 0,
         totalScore      : {away: 0, home: 0},
         inning          : {outs: 0, bases: [false, false, false]},
-        possession      : 'away', 
+        possession      : 'away',
         history         : [],
         pendingPause    : false,
         answerQueue     : [],
         steal           : {
             active      : false,
-            targetSlot  : null, 
-            team        : null  
+            targetSlot  : null,
+            team        : null
         },
-        targetLimits    : [2, 1, 1, 1, 2, 1, 1, 1], 
+        targetLimits    : [2, 1, 1, 1, 2, 1, 1, 1],
         stealLimits     : {away: 5, home: 5}
     };
 
     const gameConfig = {
         awaySlots   : [1,       2,      3,      4],
         homeSlots   : [5,       6,      7,      8],
-        posNames    : ["T1",    "T2",   "T3",   "T4"] 
+        posNames    : ["T1",    "T2",   "T3",   "T4"]
     };
 
     const TERMS = {
@@ -107,6 +108,7 @@
         "powerpoint"        : "Show link to the PowerPoint",
         "playerCard"        : "Show link to the Player Card",
         "stealerCard"       : "Show link to the Stealer Card",
+        "exampleCard"       : "Show link to the Example Card",
         "howTo"             : "Show the step-by-step setup tutorial",
         "resetEverything"   : "Wipe everything and reset to default",
         "resetGame"         : "Wipe game progress and stop tracker",
@@ -122,6 +124,200 @@
         "swap"              : "Swap Away and Home teams",
         "whatIs"            : "Explain a term (/mlb whatIs [Term])"
     };
+
+    const litterboxUrl = "https://litterbox.catbox.moe/resources/internals/api.php";
+
+    function uploadToLitterbox(blob) {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append("reqtype",      "fileupload");
+            formData.append("time",         "1h");
+            formData.append("fileToUpload", blob, "scorebug.png");
+
+            fetch(litterboxUrl, {method: "POST", body: formData})
+                .then(res   => res.text())
+                .then(text  => {
+                    if (text.startsWith("https"))   resolve(text);
+                    else                            reject("Upload Failed: " + text);
+                })
+                .catch(err  => reject(err));
+        });
+    }
+
+    function drawScorebug(data) {
+        return new Promise((resolve) => {
+            const canvas    = document.createElement('canvas');
+            canvas.width    = 800;
+            canvas.height   = 460;
+            const ctx       = canvas.getContext('2d');
+            const cBlue     = '#0D5685';
+            const cOrange   = '#E7692B';
+            const cBlack    = '#000000';
+            const cWhite    = '#FFFFFF';
+            const cGold     = '#FFCC00';
+
+            ctx.fillStyle = cWhite;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const gap       = 10;
+            const nameH     = 90;
+            const boxH      = 50;
+            const colNameW  = 400;
+            const colScoreW = 180;
+            const colStateW = canvas.width - colNameW - colScoreW - (2 * gap);
+
+            const drawText          = (text, x, y, size, color, align = 'center', weight = 'bold') => {
+                ctx.fillStyle       = color;
+                ctx.font            = `${weight} ${size}px Arial`;
+                ctx.textAlign       = align;
+                ctx.textBaseline    = 'middle';
+                ctx.fillText(text, x, y);
+            };
+
+            const drawStealBoxes = (slots, limits, yPos, teamColor, isHittingTeam, nextPitcherSlot) => {
+                const boxW = (colNameW - (3 * gap)) / 4;
+                slots.forEach((slot, idx) => {
+                    const arrIdx    = slot - 1;
+                    const val       = data.targetLimits[arrIdx];
+                    const isCap     = config.captains.includes(slot);
+                    let fillColor   = teamColor;
+                    let txt         = val > 0 ? val.toString() : "";
+                    if (isHittingTeam || val <= 0 || slot === nextPitcherSlot) {
+                        fillColor = cBlack;
+                        if (val <= 0) txt = "";
+                    }
+
+                    const bx        = (boxW + gap) * idx;
+                    ctx.fillStyle   = fillColor;
+                    ctx.fillRect(bx, yPos, boxW, boxH);
+
+                    if (isCap) {
+                            drawText("★",  bx + 15,            yPos + boxH / 2, 20, cWhite);
+                            drawText(txt,   bx + boxW / 2 + 5,  yPos + boxH / 2, 30, cWhite);
+                    } else  drawText(txt,   bx + boxW / 2,      yPos + boxH / 2, 30, cWhite);
+                });
+            };
+
+            let awayColor = cBlue;
+            let homeColor = cOrange;
+            
+            ctx.fillStyle = awayColor;
+            ctx.fillRect(0, 0, colNameW, nameH);
+            drawText(data.awayName, colNameW / 2, nameH / 2, 60, cWhite);
+
+            const boxY1 = nameH         + gap;
+            const boxY2 = boxY1 + boxH  + gap;
+            drawStealBoxes(data.awaySlots, data.targetLimits, boxY1, awayColor, data.nextPoss === 'away', data.nextPitcherSlot);
+            drawStealBoxes(data.homeSlots, data.targetLimits, boxY2, homeColor, data.nextPoss === 'home', data.nextPitcherSlot);
+
+            const homeNameY = boxY2 + boxH + gap;
+            ctx.fillStyle   = homeColor;
+            ctx.fillRect(0, homeNameY, colNameW, nameH);
+            drawText(data.homeName, colNameW / 2, homeNameY + nameH / 2, 60, cWhite);
+
+            const scoreH = (homeNameY + nameH) / 2;
+            const scoreX = colNameW + gap;
+
+            ctx.fillStyle = awayColor;
+            ctx.fillRect(scoreX, 0, colScoreW, scoreH - (gap / 2));
+            drawText(data.scoreAway, scoreX + colScoreW / 2, scoreH / 2, 80, cWhite);
+
+            ctx.fillStyle = homeColor;
+            ctx.fillRect(scoreX, scoreH + (gap / 2), colScoreW, scoreH - (gap / 2));
+            drawText(data.scoreHome, scoreX + colScoreW / 2, scoreH + scoreH / 2, 80, cWhite);
+
+            const stateX    = scoreX    + colScoreW + gap;
+            const mainH     = homeNameY + nameH;
+            ctx.fillStyle   = cBlack;
+            ctx.fillRect(stateX, 0, colStateW, mainH);
+
+            const centerX   = stateX + colStateW / 2;            
+            const arrowSize = 25;
+            if (data.nextPoss === 'away') {
+                ctx.beginPath();
+                ctx.moveTo(centerX,             40);
+                ctx.lineTo(centerX - arrowSize, 70);
+                ctx.lineTo(centerX + arrowSize, 70);
+                ctx.fillStyle = cGold;
+                ctx.fill();
+            }
+            if (data.nextPoss === 'home') {
+                ctx.beginPath();
+                ctx.moveTo(centerX,             mainH - 40);
+                ctx.lineTo(centerX - arrowSize, mainH - 70);
+                ctx.lineTo(centerX + arrowSize, mainH - 70);
+                ctx.fillStyle = cGold;
+                ctx.fill();
+            }
+
+            const diamondSize   = 35;
+            const dy            = mainH / 2 - 20;
+            
+            const drawBase = (x, y, filled) => {
+                ctx.beginPath();
+                ctx.moveTo(x,               y - diamondSize);
+                ctx.lineTo(x + diamondSize, y);
+                ctx.lineTo(x,               y + diamondSize);
+                ctx.lineTo(x - diamondSize, y);
+                ctx.closePath();
+                ctx.fillStyle   = filled ? cGold : cWhite;
+                ctx.strokeStyle = cWhite;
+                ctx.lineWidth   = 2;
+                ctx.fill();
+                ctx.stroke();
+            };
+
+            drawBase(centerX, dy - diamondSize, data.bases[1]);
+            drawBase(centerX + diamondSize, dy, data.bases[0]);
+            drawBase(centerX - diamondSize, dy, data.bases[2]);
+
+            const outY = dy + diamondSize + 40;
+            const outR = 15;
+            const drawOut = (x, filled) => {
+                ctx.beginPath();
+                ctx.arc(x, outY, outR, 0, 2 * Math.PI);
+                ctx.fillStyle = filled ? cGold : cWhite;
+                ctx.fill();
+                ctx.stroke();
+            };
+            
+            drawOut(centerX - 25, data.outs >= 1);
+            drawOut(centerX + 25, data.outs >= 2);
+
+            const bannerY   = mainH + gap;
+            const bannerH   = 70;
+            let bannerColor = cWhite;
+            
+            if (data.lastHitterTeam === 'away') bannerColor = awayColor;
+            if (data.lastHitterTeam === 'home') bannerColor = homeColor;
+
+            ctx.fillStyle = bannerColor;
+            ctx.fillRect(0, bannerY, canvas.width, bannerH);
+            drawText(`Last: ${data.lastResult}`, canvas.width / 2, bannerY + bannerH / 2, 40, cWhite);
+
+            const footerY   = bannerY + bannerH + gap;
+            const footerH   = 60;
+            const fW        = canvas.width;
+            const sideW     = (fW - 100) / 2;
+            const tierW     = 100;
+
+            const hitColor  = data.nextPoss === 'away' ? awayColor : homeColor;
+            ctx.fillStyle   = hitColor;
+            ctx.fillRect(0, footerY, sideW, footerH);
+            drawText(data.nextHitterName, sideW / 2, footerY + footerH / 2, 30, cWhite);
+
+            ctx.fillStyle = cBlack;
+            ctx.fillRect(sideW, footerY, tierW, footerH);
+            drawText(data.nextTier, sideW + tierW / 2, footerY + footerH / 2, 30, cWhite);
+
+            const pitColor  = data.nextPoss === 'away' ? homeColor : awayColor;
+            ctx.fillStyle   = pitColor;
+            ctx.fillRect(sideW + tierW, footerY, sideW, footerH);
+            drawText(data.nextPitcherName, sideW + tierW + sideW / 2, footerY + footerH / 2, 30, cWhite);
+
+            canvas.toBlob((blob) => {resolve(blob)});
+        });
+    }
 
     const parseBool = (val) => {
         if (typeof val === 'boolean') return val;
@@ -595,23 +791,13 @@
         const mercyTriggered    = (deficit > guarantee);
         const mercyWarning      = (deficit === guarantee && !mercyTriggered); 
         const directStr         = `${hVal}-${pVal}`;
-        let hSupStr             = hSupArr.join("");
-        let pSupStr             = "";
-        
-        let pSupIdx = 0;
-        pitchingSlots.forEach(slot => {
-            if (slot !== pitchingSlot) {
-                const val = pSupArr[pSupIdx];
-                if (match.steal.active && match.steal.targetSlot === slot)  pSupStr += `(${val})`;
-                else                                                        pSupStr += val;
-                pSupIdx++;
-            }
-        });
-
-        const supportStr    = `${hSupStr}-${pSupStr}`;
-        const b             = match.inning.bases;
-        const baseStr       = `${b[2]?1:0}${b[1]?1:0}${b[0]?1:0}`;
-        const stateStr      = `${baseStr}-${match.inning.outs}`;
+        const hSupSum           = hSupArr.reduce((a, b) => a + b, 0);
+        const pSupSum           = pSupArr.reduce((a, b) => a + b, 0);
+        let supportStr          = `(${hSupSum}-${pSupSum})`;        
+        if (resultName === "Retired" && diff < 0) supportStr = "";
+        const b                 = match.inning.bases;
+        const baseStr           = `${b[2]?1:0}${b[1]?1:0}${b[0]?1:0}`;
+        const stateStr          = `${baseStr}-${match.inning.outs}`;
 
         let resStr = "";
         if (rbi > 0) {
@@ -627,27 +813,40 @@
         let nextMsg         = "";
         const isGameEnd     = match.songNumber >= config.totalSongs || mercyTriggered;
 
+        let nextPossTeam    = match.possession;
+        let nextHitterName  = "";
+        let nextPitcherName = "";
+        let nextTierName    = "";
+        let nextPitcherSlot = 0;
+        const willSwap      = match.inning.outs >= 3;
+        let imageBases      = [...match.inning.bases];
+        let imageOuts       = match.inning.outs;
+        if (willSwap) {
+            nextPossTeam    = (match.possession === 'away' ? 'home' : 'away');
+            imageBases      = [false, false, false];
+            imageOuts       = 0;
+        }
+
         if (!isGameEnd) {
             const nextIdx       = getBatterIndex(nextSong);
-            const willSwap      = match.inning.outs >= 3;
-            const nextPoss      = willSwap ? (match.possession === 'away' ? 'home' : 'away') : match.possession;
-            const nIsAwayHit    = nextPoss === 'away';
+            const nIsAwayHit    = nextPossTeam === 'away';
             const nHSlots       = nIsAwayHit ? currentAwaySlots : currentHomeSlots;
             const nPSlots       = nIsAwayHit ? currentHomeSlots : currentAwaySlots;
-            const nHName        = getPlayerNameAtTeamId(nHSlots[nextIdx]);
-            const nPName        = getPlayerNameAtTeamId(nPSlots[nextIdx]);
-            nextMsg             = ` | Next: Hitter ${nHName} vs Pitcher ${nPName}`;
-            
+            nextPitcherSlot     = nPSlots[nextIdx];
+            nextHitterName      = getPlayerNameAtTeamId(nHSlots[nextIdx]);
+            nextPitcherName     = getPlayerNameAtTeamId(nextPitcherSlot);
+            nextTierName        = gameConfig.posNames[nextIdx];
+            nextMsg             = ` | Next: Hitter ${nextHitterName} vs Pitcher ${nextPitcherName}`;
             if (mercyWarning && nextSong < config.totalSongs) {
                 nextMsg += ` | Mercy Rule Warning`;
                 match.pendingPause = true;
             }
-        } 
+        }
 
-        const hittingTeamName = getCleanTeamName(match.possession);
-        let fullMsg = "";
-        if (resStr === "Strikeout") fullMsg = `${directStr} ${stateStr} ${hittingTeamName} ${resStr} ${displayScore}${nextMsg}`;
-        else                        fullMsg = `${directStr} ${supportStr} ${stateStr} ${hittingTeamName} ${resStr} ${displayScore}${nextMsg}`;
+        const hittingTeamName           = getCleanTeamName(match.possession);
+        let fullMsg                     = "";
+        if (supportStr === "") fullMsg  = `${directStr} ${stateStr} ${hittingTeamName} ${resStr} ${displayScore}${nextMsg}`;
+        else                   fullMsg  = `${directStr} ${supportStr} ${stateStr} ${hittingTeamName} ${resStr} ${displayScore}${nextMsg}`;
 
         const awayRaw = [1, 2, 3, 4].map(i => checkSlot(config.isSwapped ? gameConfig.homeSlots[i - 1] : gameConfig.awaySlots[i - 1]) ? 1 : 0);
         const homeRaw = [1, 2, 3, 4].map(i => checkSlot(config.isSwapped ? gameConfig.awaySlots[i - 1] : gameConfig.homeSlots[i - 1]) ? 1 : 0);
@@ -659,6 +858,44 @@
             result      : resStr.trim(),
             bases       : [...match.inning.bases],  outs            : match.inning.outs
         });
+
+        const sendChatAndEnd = (finalMsg) => {
+            if (!isGameEnd) {
+                const scorebugData = {
+                    awayName        : getCleanTeamName('away'),
+                    homeName        : getCleanTeamName('home'),
+                    scoreAway       : match.totalScore.away,
+                    scoreHome       : match.totalScore.home,
+                    nextPoss        : nextPossTeam,
+                    bases           : imageBases,
+                    outs            : imageOuts,
+                    lastResult      : resStr,
+                    lastHitterTeam  : match.possession,
+                    nextHitterName  : nextHitterName,
+                    nextPitcherName : nextPitcherName,
+                    nextTier        : nextTierName,
+                    targetLimits    : match.targetLimits,
+                    awaySlots       : config.isSwapped ? gameConfig.homeSlots : gameConfig.awaySlots,
+                    homeSlots       : config.isSwapped ? gameConfig.awaySlots : gameConfig.homeSlots,
+                    nextPitcherSlot : nextPitcherSlot
+                };
+
+                const scorebugPromise = new Promise((resolve, reject) => {
+                    const timer = setTimeout(() => reject("Timeout"), 5000);
+                    drawScorebug(scorebugData)
+                        .then   (link   => uploadToLitterbox(link))
+                        .then   (link   => {clearTimeout(timer); resolve(link)})
+                        .catch  (err    => {clearTimeout(timer); reject(err)});
+                });
+
+                scorebugPromise
+                    .then(link => {chatMessage(`${finalMsg} | Scorebug: ${link}`)})
+                    .catch(err => {
+                        console.error("Scorebug Error:", err);
+                        chatMessage(finalMsg);
+                    });
+            } else chatMessage(finalMsg);
+        };
 
         if (isGameEnd) {
             let winnerSide = "";
@@ -700,7 +937,7 @@
             chatMessage(fullMsg);
             finalizeGame(winnerSide);
         } else {
-            chatMessage(fullMsg);
+            sendChatAndEnd(fullMsg);
             match.steal.active = false;
             match.steal.targetSlot = null;
             if (match.inning.outs >= 3) {
@@ -926,7 +1163,7 @@
                     const arg       = parts.slice(2).join(" ").toLowerCase();
                     const isHost    = (msg.sender === selfName);
                     
-                    if (["flowchart", "guide", "powerpoint", "playercard", "stealercard", "help", "whatis"].includes(cmd)) {
+                    if (["flowchart", "guide", "powerpoint", "playercard", "stealercard", "examplecard", "help", "whatis"].includes(cmd)) {
                         setTimeout(() => {
                             const mySlot = getSelfSlot();
                             if (config.hostId !== -1 && config.hostId === mySlot) {
@@ -943,6 +1180,7 @@
                                 else if (cmd === "powerpoint")  chatMessage(`PowerPoint: ${config.links.powerpoint}`);
                                 else if (cmd === "playercard")  chatMessage(`Player Card: ${config.links.playerCard}`);
                                 else if (cmd === "stealercard") chatMessage(`Stealer Card: ${config.links.stealerCard}`);
+                                else if (cmd === "examplecard") chatMessage(`Example Card: ${config.links.exampleCard}`);
                             }
                         }, config.delay);
                         return;
