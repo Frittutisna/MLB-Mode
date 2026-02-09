@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-rc.0.4
+// @version      0-rc.1.0
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -147,7 +147,7 @@
     function drawScorebug(data) {
         return new Promise((resolve) => {
             const canvas    = document.createElement('canvas');
-            canvas.width    = 900;
+            canvas.width    = 840; 
             canvas.height   = 460;
             const ctx       = canvas.getContext('2d');
             const cBlue     = '#0D5685';
@@ -185,13 +185,9 @@
                     let txt = "";
                     if (val > 0) {
                         txt = val.toString();
-                        if (isCap) txt = "★" + txt;
-                    }
-
-                    if (isHittingTeam || val <= 0 || slot === nextPitcherSlot) {
-                        fillColor = cBlack;
-                        if (val <= 0) txt = "";
-                    }
+                        if      (isCap) txt = "★" + txt;
+                    } else if   (isCap) txt = "★";
+                    if (isHittingTeam || val <= 0 || slot === nextPitcherSlot) fillColor = cBlack;
 
                     const bx        = (boxW + gap) * idx;
                     ctx.fillStyle   = fillColor;
@@ -245,25 +241,26 @@
             const arrowSize    = 25;
 
             ctx.beginPath();
-            ctx.moveTo(arrowCenterX,             50);
-            ctx.lineTo(arrowCenterX - arrowSize, 95); 
-            ctx.lineTo(arrowCenterX + arrowSize, 95);
+            ctx.moveTo(arrowCenterX,             60);
+            ctx.lineTo(arrowCenterX - arrowSize, 105);
+            ctx.lineTo(arrowCenterX + arrowSize, 105);
             ctx.fillStyle = (data.nextPoss === 'away') ? cGold : cWhite;
             ctx.fill();
 
-            if (data.songNumber) drawText(data.songNumber.toString(), arrowCenterX, mainH / 2 + 3, 60, cWhite);
+            const songDisplay = (data.songNumber !== undefined) ? (data.songNumber + 1).toString() : "1";
+            drawText(songDisplay, arrowCenterX, mainH / 2 + 3, 60, cWhite);
 
             ctx.beginPath();
-            ctx.moveTo(arrowCenterX,             mainH - 50);
-            ctx.lineTo(arrowCenterX - arrowSize, mainH - 95);
-            ctx.lineTo(arrowCenterX + arrowSize, mainH - 95);
+            ctx.moveTo(arrowCenterX,             mainH - 60);
+            ctx.lineTo(arrowCenterX - arrowSize, mainH - 105);
+            ctx.lineTo(arrowCenterX + arrowSize, mainH - 105);
             ctx.fillStyle = (data.nextPoss === 'home') ? cGold : cWhite;
             ctx.fill();
 
             const fieldCenterX = fieldBoxX + fieldBoxW / 2;
-            const diamondSize  = 28;
-            const dy           = mainH / 2 - 20;
-            const baseGap      = 5; 
+            const diamondSize  = 34;
+            const baseGap      = 10;
+            const dy           = mainH / 2 - 35;
             
             const drawBase = (x, y, filled) => {
                 ctx.beginPath();
@@ -280,8 +277,9 @@
             drawBase(fieldCenterX + diamondSize + baseGap,  dy,                         data.bases[0]);
             drawBase(fieldCenterX - diamondSize - baseGap,  dy,                         data.bases[2]);
 
-            const outY = dy + diamondSize + 40;
-            const outR = 20;
+            const outY = dy + diamondSize + 70;
+            const outR = 24;
+            
             const drawOut = (x, filled) => {
                 ctx.beginPath();
                 ctx.arc(x, outY, outR, 0, 2 * Math.PI);
@@ -290,8 +288,8 @@
                 ctx.stroke();
             };
             
-            drawOut(fieldCenterX - 25, data.outs >= 1);
-            drawOut(fieldCenterX + 25, data.outs >= 2);
+            drawOut(fieldCenterX - 30, data.outs >= 1);
+            drawOut(fieldCenterX + 30, data.outs >= 2);
 
             const bannerY   = mainH + gap;
             const bannerH   = 70;

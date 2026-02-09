@@ -1,11 +1,11 @@
-# MLB Mode v0-rc.0.0
+# MLB Mode v0-rc.1.0
 
 ## Table of Contents
 - [TLDR: What Do I Do?](#tldr-what-is-this-and-what-do-i-do)
 - [Links: Balancer, Flowchart, Many Others](#links-balancer-flowchart-many-others)
 - [Overview: Those Long Setting Codes](#overview-those-long-setting-codes)
 - [Comparison: What's The Difference?](#comparison-whats-the-difference)
-- [Changelog: What Changed From v0-beta.0](#changelog-what-changed-from-v0-beta0)
+- [Changelog: What Changed From v0-rc.0?](#changelog-what-changed-from-v0-rc0)
 - [Lineup: Away and Home, Captains](#lineup-away-and-home-captains)
 - [Score: Check the (T)DIFF](#score-check-the-tdiff)
 - [Ending: Mercy Rule, Tiebreakers](#ending-mercy-rule-tiebreakers)
@@ -24,6 +24,7 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
 
 ## Links: Balancer, Flowchart, Many Others
 - [Link to the Balancer](https://github.com/Frittutisna/Balancer)
+- [Link to the Example Card](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Example.png)
 - [Link to the Flowchart](https://github.com/Frittutisna/MLB-Mode/blob/main/Flowchart/Flowchart.pdf)
 - [Link to the Player Card](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/Player.png)
 - [Link to the PowerPoint](https://github.com/Frittutisna/MLB-Mode/blob/main/PowerPoint/PowerPoint.pdf)
@@ -143,15 +144,12 @@ In very simple terms: *it's rotating 1v1s with the other 3v3 driving the bases*
     </tbody>
 </table>
 
-## Changelog: What Changed From v0-beta.0
-### Format Changes
-- Changed maximum tour length from 7 games to 5
+## Changelog: What Changed From v0-rc.0?
+### PowerPoint Change
+- Added Example Card
 ### Script Changes
-- Split Captain role into Captain and **Stealer**
-- Added `/mlb setStealers [1-4] [5-8]` to set Stealers
-- Added `/mlb counter` to view live Steal Counter
-- Improved Steal clarity
-- Changed `Next: A vs B` to `Next: Hitter A vs Pitcher B`
+- Added Scorebug
+- Changed song state report from `1-0 211-211` to `1-0 (4-4)`
 
 ## Lineup: Away And Home, Captains
 The team listed first (above) on Challonge is the **Away** team for each series. Line up as follows before each series: **Away** (Slots 1-4: T1, T2, T3, T4), then **Home** (Slots 5-8: T1, T2, T3, T4). The T1 of each team is also designated as their **Captain**, which carries a **+1 bonus** for their correct guesses. Captains are normally **Stealers** as well, but they can delegate that role to their teammate if they so choose. 
