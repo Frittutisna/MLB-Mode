@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-rc.0.2
+// @version      0-rc.0.3
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -162,8 +162,8 @@
             const gap       = 10;
             const nameH     = 90;
             const boxH      = 50;
-            const colNameW  = 400;
-            const colScoreW = 180;
+            const colNameW  = 340;
+            const colScoreW = 140;
             const colStateW = canvas.width - colNameW - colScoreW - (2 * gap);
 
             const drawText          = (text, x, y, size, color, align = 'center', weight = 'bold') => {
@@ -207,7 +207,7 @@
 
             ctx.fillStyle = awayColor;
             ctx.fillRect(0, 0, colNameW, nameH);
-            drawText(awayAbbr, colNameW / 2, nameH / 2, 80, cWhite);
+            drawText(awayAbbr, colNameW / 2, nameH / 2 + 3, 65, cWhite);
 
             const boxY1 = nameH         + gap;
             const boxY2 = boxY1 + boxH  + gap;
@@ -217,21 +217,21 @@
             const homeNameY = boxY2 + boxH + gap;
             ctx.fillStyle   = homeColor;
             ctx.fillRect(0, homeNameY, colNameW, nameH);
-            drawText(homeAbbr, colNameW / 2, homeNameY + nameH / 2, 80, cWhite);
+            drawText(homeAbbr, colNameW / 2, homeNameY + nameH / 2 + 3, 65, cWhite);
 
-            const scoreH = (homeNameY + nameH) / 2;
-            const scoreX = colNameW + gap;
+            const mainH     = homeNameY + nameH;
+            const scoreH    = mainH / 2;
+            const scoreX    = colNameW + gap;
 
             ctx.fillStyle = awayColor;
             ctx.fillRect(scoreX, 0, colScoreW, scoreH - (gap / 2));
-            drawText(data.scoreAway, scoreX + colScoreW / 2, scoreH / 2, 80, cWhite);
+            drawText(data.scoreAway, scoreX + colScoreW / 2, scoreH / 2 + 3, 80, cWhite);
 
             ctx.fillStyle = homeColor;
             ctx.fillRect(scoreX, scoreH + (gap / 2), colScoreW, scoreH - (gap / 2));
-            drawText(data.scoreHome, scoreX + colScoreW / 2, scoreH + scoreH / 2, 80, cWhite);
+            drawText(data.scoreHome, scoreX + colScoreW / 2, scoreH + (scoreH / 2) + 3, 80, cWhite);
 
             const stateX    = scoreX    + colScoreW + gap;
-            const mainH     = homeNameY + nameH;
             const arrowBoxW = 90;
             const fieldBoxW = colStateW - arrowBoxW - gap;
             const arrowBoxX = stateX;
@@ -242,26 +242,26 @@
             ctx.fillRect(fieldBoxX, 0, fieldBoxW, mainH);
 
             const arrowCenterX = arrowBoxX + arrowBoxW / 2;
-            const arrowSize    = 20;
+            const arrowSize    = 25;
 
             ctx.beginPath();
-            ctx.moveTo(arrowCenterX,             40);
-            ctx.lineTo(arrowCenterX - arrowSize, 70);
-            ctx.lineTo(arrowCenterX + arrowSize, 70);
+            ctx.moveTo(arrowCenterX,             50);
+            ctx.lineTo(arrowCenterX - arrowSize, 95); 
+            ctx.lineTo(arrowCenterX + arrowSize, 95);
             ctx.fillStyle = (data.nextPoss === 'away') ? cGold : cWhite;
             ctx.fill();
 
-            if (data.songNumber) drawText(data.songNumber.toString(), arrowCenterX, mainH / 2, 40, cWhite);
+            if (data.songNumber) drawText(data.songNumber.toString(), arrowCenterX, mainH / 2 + 3, 60, cWhite);
 
             ctx.beginPath();
-            ctx.moveTo(arrowCenterX,             mainH - 40);
-            ctx.lineTo(arrowCenterX - arrowSize, mainH - 70);
-            ctx.lineTo(arrowCenterX + arrowSize, mainH - 70);
+            ctx.moveTo(arrowCenterX,             mainH - 50);
+            ctx.lineTo(arrowCenterX - arrowSize, mainH - 95);
+            ctx.lineTo(arrowCenterX + arrowSize, mainH - 95);
             ctx.fillStyle = (data.nextPoss === 'home') ? cGold : cWhite;
             ctx.fill();
 
             const fieldCenterX = fieldBoxX + fieldBoxW / 2;
-            const diamondSize  = 35; 
+            const diamondSize  = 28;
             const dy           = mainH / 2 - 20;
             const baseGap      = 5; 
             
@@ -272,11 +272,8 @@
                 ctx.lineTo(x,               y + diamondSize);
                 ctx.lineTo(x - diamondSize, y);
                 ctx.closePath();
-                ctx.fillStyle   = filled ? cGold : cWhite;
-                ctx.strokeStyle = cWhite;
-                ctx.lineWidth   = 2;
+                ctx.fillStyle = filled ? cGold : cWhite;
                 ctx.fill();
-                ctx.stroke();
             };
 
             drawBase(fieldCenterX,                          dy - diamondSize - baseGap, data.bases[1]);
@@ -293,8 +290,8 @@
                 ctx.stroke();
             };
             
-            drawOut(fieldCenterX - 25, data.outs >= 1);
-            drawOut(fieldCenterX + 25, data.outs >= 2);
+            drawOut(fieldCenterX - 20, data.outs >= 1);
+            drawOut(fieldCenterX + 20, data.outs >= 2);
 
             const bannerY   = mainH + gap;
             const bannerH   = 70;
