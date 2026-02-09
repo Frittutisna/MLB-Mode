@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         AMQ MLB Mode
 // @namespace    https://github.com/Frittutisna
-// @version      0-rc.0.3
+// @version      0-rc.0.4
 // @description  Script to track MLB Mode on AMQ
 // @author       Frittutisna
 // @match        https://*.animemusicquiz.com/*
@@ -147,7 +147,7 @@
     function drawScorebug(data) {
         return new Promise((resolve) => {
             const canvas    = document.createElement('canvas');
-            canvas.width    = 800;
+            canvas.width    = 900;
             canvas.height   = 460;
             const ctx       = canvas.getContext('2d');
             const cBlue     = '#0D5685';
@@ -281,7 +281,7 @@
             drawBase(fieldCenterX - diamondSize - baseGap,  dy,                         data.bases[2]);
 
             const outY = dy + diamondSize + 40;
-            const outR = 15;
+            const outR = 20;
             const drawOut = (x, filled) => {
                 ctx.beginPath();
                 ctx.arc(x, outY, outR, 0, 2 * Math.PI);
@@ -290,8 +290,8 @@
                 ctx.stroke();
             };
             
-            drawOut(fieldCenterX - 20, data.outs >= 1);
-            drawOut(fieldCenterX + 20, data.outs >= 2);
+            drawOut(fieldCenterX - 25, data.outs >= 1);
+            drawOut(fieldCenterX + 25, data.outs >= 2);
 
             const bannerY   = mainH + gap;
             const bannerH   = 70;
@@ -306,16 +306,17 @@
 
             const footerY   = bannerY + bannerH + gap;
             const footerH   = 60;
-            const fW        = canvas.width;
-            const tierW     = 100;
-            const sideW     = (fW - tierW - (2 * gap)) / 2;
+
+            const leftW     = colNameW;
+            const tierW     = colScoreW;
+            const rightW    = colStateW;
 
             const hitColor  = data.nextPoss === 'away' ? awayColor : homeColor;
             ctx.fillStyle   = hitColor;
-            ctx.fillRect(0, footerY, sideW, footerH);
-            drawText(data.nextHitterName, sideW / 2, footerY + footerH / 2, 30, cWhite);
+            ctx.fillRect(0, footerY, leftW, footerH);
+            drawText(data.nextHitterName, leftW / 2, footerY + footerH / 2, 30, cWhite);
 
-            const tierX     = sideW + gap;
+            const tierX     = leftW + gap;
             ctx.fillStyle   = cBlack;
             ctx.fillRect(tierX, footerY, tierW, footerH);
             drawText(data.nextTier, tierX + tierW / 2, footerY + footerH / 2, 30, cWhite);
@@ -323,8 +324,8 @@
             const pitColor = data.nextPoss === 'away' ? homeColor : awayColor;
             const pitX     = tierX + tierW + gap;
             ctx.fillStyle  = pitColor;
-            ctx.fillRect(pitX, footerY, sideW, footerH);
-            drawText(data.nextPitcherName, pitX + sideW / 2, footerY + footerH / 2, 30, cWhite);
+            ctx.fillRect(pitX, footerY, rightW, footerH);
+            drawText(data.nextPitcherName, pitX + rightW / 2, footerY + footerH / 2, 30, cWhite);
 
             canvas.toBlob((blob) => {resolve(blob)});
         });
